@@ -1,0 +1,348 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.60.1.11101/W32 for ARM       09/May/2016  22:00:47
+# Copyright 1999-2016 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        C:\Users\cory\Documents\GitHub\SPAIS\src\app\02-gpio\gpio_app.c
+#    Command line =  
+#        C:\Users\cory\Documents\GitHub\SPAIS\src\app\02-gpio\gpio_app.c -lcN
+#        C:\Users\cory\Documents\GitHub\SPAIS\projects\iar\SPAIS\Debug\List
+#        --diag_suppress
+#        Pa039,Pa050,Pe767,Go005,Pa082,Pa089,Pe167,Pe550,Pe188,Pe177 -o
+#        C:\Users\cory\Documents\GitHub\SPAIS\projects\iar\SPAIS\Debug\Obj
+#        --debug --endian=little --cpu=Cortex-M3 --no_path_in_file_macros
+#        --enum_is_int -e --fpu=None --dlib_config "C:\Program Files (x86)\IAR
+#        Systems\Embedded Workbench 7.4_0\arm\INC\c\DLib_Config_Normal.h"
+#        --preinclude
+#        C:\Users\cory\Documents\GitHub\SPAIS\projects\iar\SPAIS\..\all_projects.iarinc
+#        -I
+#        C:\Users\cory\Documents\GitHub\SPAIS\projects\iar\SPAIS\..\..\..\src\app\00-hello\
+#        -I
+#        C:\Users\cory\Documents\GitHub\SPAIS\projects\iar\SPAIS\..\..\..\src\app\common\
+#        -I
+#        C:\Users\cory\Documents\GitHub\SPAIS\projects\iar\SPAIS\..\..\..\src\inc\
+#        -I
+#        C:\Users\cory\Documents\GitHub\SPAIS\projects\iar\SPAIS\..\..\..\src\modules\clilib\
+#        -I
+#        C:\Users\cory\Documents\GitHub\SPAIS\projects\iar\SPAIS\..\..\..\src\modules\ip_applib\
+#        -Oh
+#    Locale       =  C
+#    List file    =  
+#        C:\Users\cory\Documents\GitHub\SPAIS\projects\iar\SPAIS\Debug\List\gpio_app.lst
+#    Object file  =  
+#        C:\Users\cory\Documents\GitHub\SPAIS\projects\iar\SPAIS\Debug\Obj\gpio_app.o
+#
+###############################################################################
+
+C:\Users\cory\Documents\GitHub\SPAIS\src\app\02-gpio\gpio_app.c
+      1          /*
+      2          Copyright (c) 2013, Dust Networks.  All rights reserved.
+      3          */
+      4          
+      5          #include "dn_common.h"
+      6          #include "cli_task.h"
+      7          #include "loc_task.h"
+      8          #include "dn_gpio.h"
+      9          #include "dn_system.h"
+     10          #include "dn_exe_hdr.h"
+     11          #include "app_task_cfg.h"
+     12          #include "Ver.h"
+     13          
+     14          //=========================== definitions =====================================
+     15          
+     16          // blue LED on DC9003A
+     17          #define PIN_TOGGLE      DN_GPIO_PIN_22_DEV_ID
+     18          
+     19          // DP2 on DC9003A
+     20          #define PIN_NOTIF       DN_GPIO_PIN_21_DEV_ID
+     21          
+     22          //=========================== variables =======================================
+     23          
+     24          typedef struct {
+     25             // gpioToggle
+     26             OS_STK         gpioToggleTaskStack[TASK_APP_GPIOTOGGLE_STK_SIZE];
+     27             // gpioNotif
+     28             INT32U         gpioNotifChannelBuf[1+DN_CH_ASYNC_RXBUF_SIZE(sizeof(dn_gpio_notif_t))/sizeof(INT32U)];
+     29             OS_STK         gpioNotifTaskStack[TASK_APP_GPIONOTIF_STK_SIZE];
+     30          } gpio_app_vars_t;
+     31          
+     32          gpio_app_vars_t gpio_app_v;
+     33          
+     34          //=========================== externs =========================================
+     35          
+     36          //=========================== prototypes ======================================
+     37          
+     38          static void gpioToggleTask(void* unused);
+     39          static void gpioNotifTask(void* unused);
+     40          
+     41          //=========================== initialization ==================================
+     42          
+     43          int p2_init(void) {
+     44             dn_error_t             status;
+     45             dn_error_t             dnErr;
+     46             INT8U                  osErr;
+     47             
+     48             //==== initialize helper tasks
+     49             
+     50             cli_task_init(
+     51                "gpio",                               // appName
+     52                NULL                                  // cliCmds
+     53             );
+     54             loc_task_init(
+     55                JOIN_NO,                              // fJoin
+     56                NETID_NONE,                           // netId
+     57                UDPPORT_NONE,                         // udpPort
+     58                NULL,                                 // joinedSem
+     59                BANDWIDTH_NONE,                       // bandwidth
+     60                NULL                                  // serviceSem
+     61             );
+     62             
+     63             //===== gpioToggle task
+     64             
+     65             osErr = OSTaskCreateExt(
+     66                gpioToggleTask,
+     67                (void *) 0,
+     68                (OS_STK*) (&gpio_app_v.gpioToggleTaskStack[TASK_APP_GPIOTOGGLE_STK_SIZE-1]),
+     69                TASK_APP_GPIOTOGGLE_PRIORITY,
+     70                TASK_APP_GPIOTOGGLE_PRIORITY,
+     71                (OS_STK*) gpio_app_v.gpioToggleTaskStack,
+     72                TASK_APP_GPIOTOGGLE_STK_SIZE,
+     73                (void *) 0,
+     74                OS_TASK_OPT_STK_CHK | OS_TASK_OPT_STK_CLR
+     75             );
+     76             ASSERT(osErr == OS_ERR_NONE);
+     77             OSTaskNameSet(TASK_APP_GPIOTOGGLE_PRIORITY, (INT8U*)TASK_APP_GPIOTOGGLE_NAME, &osErr);
+     78             ASSERT(osErr == OS_ERR_NONE);
+     79             
+     80             //===== gpioNotif task
+     81             
+     82             osErr = OSTaskCreateExt(
+     83                gpioNotifTask,
+     84                (void *) 0,
+     85                (OS_STK*) (&gpio_app_v.gpioNotifTaskStack[TASK_APP_GPIONOTIF_STK_SIZE - 1]),
+     86                TASK_APP_GPIONOTIF_PRIORITY,
+     87                TASK_APP_GPIONOTIF_PRIORITY,
+     88                (OS_STK*) gpio_app_v.gpioNotifTaskStack,
+     89                TASK_APP_GPIONOTIF_STK_SIZE,
+     90                (void *) 0,
+     91                OS_TASK_OPT_STK_CHK | OS_TASK_OPT_STK_CLR
+     92             );
+     93             ASSERT(osErr == OS_ERR_NONE);
+     94             OSTaskNameSet(TASK_APP_GPIONOTIF_PRIORITY, (INT8U*)TASK_APP_GPIONOTIF_NAME, &osErr);
+     95             ASSERT(osErr == OS_ERR_NONE);
+     96             
+     97             return 0;
+     98          }
+     99          
+    100          //=========================== GPIO toggle task ================================
+    101          
+    102          static void gpioToggleTask(void* unused) {
+    103             dn_error_t              dnErr;
+    104             dn_gpio_ioctl_cfg_out_t gpioOutCfg;
+    105             INT8U                   pinState;
+    106             
+    107             // open pin
+    108             dnErr = dn_open(
+    109                PIN_TOGGLE,                 // device
+    110                NULL,                       // args
+    111                0                           // argLen 
+    112             );
+    113             ASSERT(dnErr==DN_ERR_NONE);
+    114             
+    115             // configure as output
+    116             gpioOutCfg.initialLevel = 0x00;
+    117             dnErr = dn_ioctl(
+    118                PIN_TOGGLE,                 // device
+    119                DN_IOCTL_GPIO_CFG_OUTPUT,   // request
+    120                &gpioOutCfg,                // args
+    121                sizeof(gpioOutCfg)          // argLen
+    122             );
+    123             ASSERT(dnErr==DN_ERR_NONE);
+    124             
+    125             while (1) { // this is a task, it executes forever
+    126          
+    127                // block the task for some time
+    128                OSTimeDly(1000);
+    129                
+    130                // change output value
+    131                if (pinState==0x00) {
+    132                   pinState = 0x01;
+    133                } else {
+    134                   pinState = 0x00;
+    135                }
+    136          
+    137                // toggle pin
+    138                dnErr = dn_write(
+    139                   PIN_TOGGLE,              // device
+    140                   &pinState,               // buf
+    141                   sizeof(pinState)         // len
+    142                );
+    143                ASSERT(dnErr==DN_ERR_NONE);
+    144             }
+    145          }
+    146          
+    147          //=========================== GPIO notif task =================================
+    148          
+    149          static void gpioNotifTask(void* unused) {
+    150             dn_error_t                     dnErr;
+    151             INT8U                          osErr;
+    152             OS_MEM*                        notifChannelMem;
+    153             CH_DESC                        notifChannel;
+    154             dn_gpio_ioctl_cfg_in_t         gpioInCfg;
+    155             dn_gpio_ioctl_notif_enable_t   gpioNotifEnable;
+    156             dn_gpio_notif_t                gpioNotif;
+    157             INT32U                         rxLen;
+    158             INT32U                         msgType;
+    159             INT32U                         maxLen;
+    160             
+    161             // allocate memory for GPIO notification channel
+    162             notifChannelMem = OSMemCreate(
+    163                gpio_app_v.gpioNotifChannelBuf,
+    164                1,
+    165                DN_CH_ASYNC_RXBUF_SIZE(sizeof(dn_gpio_notif_t)),
+    166                &osErr
+    167             );
+    168             ASSERT(osErr==OS_ERR_NONE);
+    169             
+    170             // create channel from memory
+    171             dnErr = dn_createAsyncChannel(
+    172                notifChannelMem,
+    173                &notifChannel
+    174             );
+    175             ASSERT(dnErr == DN_ERR_NONE);
+    176             
+    177             // open pin
+    178             dnErr = dn_open(
+    179                PIN_NOTIF,
+    180                NULL,
+    181                0
+    182             );
+    183             ASSERT(dnErr==DN_ERR_NONE);
+    184             
+    185             // enable pull down resistor
+    186             gpioInCfg.pullMode = DN_GPIO_PULL_DOWN;
+    187             dnErr = dn_ioctl(
+    188                PIN_NOTIF,
+    189                DN_IOCTL_GPIO_CFG_INPUT,
+    190                &gpioInCfg,
+    191                sizeof(gpioInCfg)
+    192             );
+    193             ASSERT(dnErr==DN_ERR_NONE);
+    194             
+    195             // enable GPIO notification
+    196             gpioNotifEnable.activeLevel    = 1;
+    197             gpioNotifEnable.fEnable        = 1;
+    198             gpioNotifEnable.notifChannelId = notifChannel;
+    199             dnErr = dn_ioctl(
+    200                PIN_NOTIF,
+    201                DN_IOCTL_GPIO_ENABLE_NOTIF,
+    202                &gpioNotifEnable,
+    203                sizeof(gpioNotifEnable)
+    204             );
+    205             ASSERT(dnErr == DN_ERR_NONE);
+    206             
+    207             while (1) { // this is a task, it executes forever
+    208                
+    209                // wait for a GPIO notification
+    210                dnErr = dn_readAsyncMsg(
+    211                   notifChannel,            // chDesc
+    212                   &gpioNotif,              // msg
+    213                   &rxLen,                  // rxLen
+    214                   &msgType,                // msgType
+    215                   sizeof(gpioNotif),       // maxLen
+    216                   0                        // timeout
+    217                );
+    218                ASSERT(dnErr==DN_ERR_NONE);
+    219                
+    220                // print
+    221                dnm_ucli_printf("gpioNotifTask: level=%d.\r\n",gpioNotif.level);
+    222          
+    223                // re-arm notification on opposite level
+    224                if (gpioNotifEnable.activeLevel==0x01) {
+    225                   gpioNotifEnable.activeLevel = 0x00;
+    226                } else {
+    227                   gpioNotifEnable.activeLevel = 0x01;
+    228                }
+    229                dnErr = dn_ioctl(
+    230                   PIN_NOTIF,
+    231                   DN_IOCTL_GPIO_ENABLE_NOTIF,
+    232                   &gpioNotifEnable,
+    233                   sizeof(gpioNotifEnable)
+    234                );
+    235                ASSERT(dnErr == DN_ERR_NONE);
+    236             }
+    237          }
+    238          
+    239          //=============================================================================
+    240          //=========================== install a kernel header =========================
+    241          //=============================================================================
+    242          
+    243          /**
+    244           A kernel header is a set of bytes prepended to the actual binary image of this
+    245           application. Thus header is needed for your application to start running.
+    246           */
+    247          
+    248          DN_CREATE_EXE_HDR(DN_VENDOR_ID_NOT_SET,
+    249                            DN_APP_ID_NOT_SET,
+    250                            VER_MAJOR,
+    251                            VER_MINOR,
+    252                            VER_PATCH,
+    253                            VER_BUILD);
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+      48   gpioNotifTask
+        48   -> OSMemCreate
+        48   -> assert_handler
+        48   -> dn_createAsyncChannel
+        48   -> dn_ioctl
+        48   -> dn_open
+        48   -> dn_readAsyncMsg
+        48   -> dnm_ucli_printf
+      16   gpioToggleTask
+        16   -> OSTimeDly
+        16   -> assert_handler
+        16   -> dn_ioctl
+        16   -> dn_open
+        16   -> dn_write
+      32   p2_init
+        32   -> OSTaskCreateExt
+        32   -> OSTaskNameSet
+        32   -> assert_handler
+        32   -> cli_task_init
+        32   -> loc_task_init
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable6
+       4  ??DataTable6_1
+       8  ?_0
+      12  ?_1
+      12  ?_2
+      12  ?_3
+      28  ?_4
+     224  gpioNotifTask
+      96  gpioToggleTask
+    2060  gpio_app_v
+      32  kernelExeHdr
+     204  p2_init
+
+ 
+ 2 060 bytes in section .bss
+    32 bytes in section .kernel_exe_hdr
+   604 bytes in section .text
+ 
+   604 bytes of CODE  memory
+    32 bytes of CONST memory
+ 2 060 bytes of DATA  memory
+
+Errors: none
+Warnings: none

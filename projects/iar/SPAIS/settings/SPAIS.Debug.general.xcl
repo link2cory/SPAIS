@@ -1,0 +1,13 @@
+"C:\Program Files (x86)\IAR Systems\Embedded Workbench 7.4_0\arm\bin\armproc.dll" 
+
+"C:\Program Files (x86)\IAR Systems\Embedded Workbench 7.4_0\arm\bin\armjlink2.dll" 
+
+"C:\Users\cory\Documents\GitHub\SPAIS\projects\iar\SPAIS\Debug\Exe\ocfdk_spais.out" 
+
+--plugin "C:\Program Files (x86)\IAR Systems\Embedded Workbench 7.4_0\arm\bin\armbat.dll" 
+
+--flash_loader "C:\Program Files (x86)\IAR Systems\Embedded Workbench 7.4_0\arm\config\flashloader\Linear\DustNetworks\FlashEterna.board" 
+
+
+
+

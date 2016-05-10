@@ -1,0 +1,633 @@
+###############################################################################
+#
+# IAR ANSI C/C++ Compiler V7.60.1.11101/W32 for ARM       09/May/2016  21:56:19
+# Copyright 1999-2016 IAR Systems AB.
+#
+#    Cpu mode     =  thumb
+#    Endian       =  little
+#    Source file  =  
+#        C:\Users\cory\Documents\GitHub\SPAIS\src\app\02-gpio_net\gpio_net_app.c
+#    Command line =  
+#        C:\Users\cory\Documents\GitHub\SPAIS\src\app\02-gpio_net\gpio_net_app.c
+#        -lcN
+#        C:\Users\cory\Documents\GitHub\SPAIS\projects\iar\SPAIS\Debug\List
+#        --diag_suppress
+#        Pa039,Pa050,Pe767,Go005,Pa082,Pa089,Pe167,Pe550,Pe188,Pe177 -o
+#        C:\Users\cory\Documents\GitHub\SPAIS\projects\iar\SPAIS\Debug\Obj
+#        --debug --endian=little --cpu=Cortex-M3 --no_path_in_file_macros
+#        --enum_is_int -e --fpu=None --dlib_config "C:\Program Files (x86)\IAR
+#        Systems\Embedded Workbench 7.4_0\arm\INC\c\DLib_Config_Normal.h"
+#        --preinclude
+#        C:\Users\cory\Documents\GitHub\SPAIS\projects\iar\SPAIS\..\all_projects.iarinc
+#        -I
+#        C:\Users\cory\Documents\GitHub\SPAIS\projects\iar\SPAIS\..\..\..\src\app\00-hello\
+#        -I
+#        C:\Users\cory\Documents\GitHub\SPAIS\projects\iar\SPAIS\..\..\..\src\app\common\
+#        -I
+#        C:\Users\cory\Documents\GitHub\SPAIS\projects\iar\SPAIS\..\..\..\src\inc\
+#        -I
+#        C:\Users\cory\Documents\GitHub\SPAIS\projects\iar\SPAIS\..\..\..\src\modules\clilib\
+#        -I
+#        C:\Users\cory\Documents\GitHub\SPAIS\projects\iar\SPAIS\..\..\..\src\modules\ip_applib\
+#        -Oh
+#    Locale       =  C
+#    List file    =  
+#        C:\Users\cory\Documents\GitHub\SPAIS\projects\iar\SPAIS\Debug\List\gpio_net_app.lst
+#    Object file  =  
+#        C:\Users\cory\Documents\GitHub\SPAIS\projects\iar\SPAIS\Debug\Obj\gpio_net_app.o
+#
+###############################################################################
+
+C:\Users\cory\Documents\GitHub\SPAIS\src\app\02-gpio_net\gpio_net_app.c
+      1          /*
+      2          Copyright (c) 2013, Dust Networks.  All rights reserved.
+      3          */
+      4          
+      5          #include "dn_common.h"
+      6          #include "string.h"
+      7          #include "stdio.h"
+      8          #include "cli_task.h"
+      9          #include "loc_task.h"
+     10          #include "dn_system.h"
+     11          #include "dn_gpio.h"
+     12          #include "dnm_local.h"
+     13          #include "dn_fs.h"
+     14          #include "dn_exe_hdr.h"
+     15          #include "well_known_ports.h"
+     16          #include "app_task_cfg.h"
+     17          #include "Ver.h"
+     18          
+     19          //=========================== definitions =====================================
+     20          
+     21          // LEDs on DC9003A
+     22          #define LED_GREEN1                DN_GPIO_PIN_20_DEV_ID
+     23          #define LED_GREEN2                DN_GPIO_PIN_23_DEV_ID
+     24          
+     25          // DP0 on DC9003A
+     26          #define SAMPLE_PIN                DN_GPIO_PIN_0_DEV_ID
+     27          
+     28          #define LOWVAL_DEFAULT            0
+     29          #define HIGHVAL_DEFAULT           1
+     30          #define PERIOD_DEFAULT            10000
+     31          
+     32          #define GPIO_NET_CONFIG_FILENAME  "2gpioNet.cfg"
+     33          
+     34          // format of config file
+     35          typedef struct{
+     36             INT8U           lowval;
+     37             INT8U           highval;
+     38             INT16U          period;
+     39          } gpio_net_configFileStruct_t;
+     40          
+     41          //=========================== variables =======================================
+     42          
+     43          typedef struct {
+     44             OS_STK          gpioSampleTaskStack[TASK_APP_GPIOSAMPLE_STK_SIZE];
+     45             OS_EVENT*       joinedSem;
+     46             INT8U           lowval;        ///< value transmitted when pin is low
+     47             INT8U           highval;       ///< value transmitted when pin is high
+     48             INT16U          period;        ///< period (in ms) between transmissions
+     49          } gpio_net_app_vars_t;
+     50          
+     51          gpio_net_app_vars_t gpio_net_app_v;
+     52          
+     53          //=========================== prototypes ======================================
+     54          
+     55          //===== CLI
+     56          dn_error_t  gpioNet_cli_config(INT8U* buf, INT32U len);
+     57          dn_error_t  gpioNet_cli_lowval(INT8U* buf, INT32U len);
+     58          dn_error_t  gpioNet_cli_highval(INT8U* buf, INT32U len);
+     59          dn_error_t  gpioNet_cli_period(INT8U* buf, INT32U len);
+     60          //===== configFile
+     61                 void initConfigFile(void);
+     62                 void syncToConfigFile(void);
+     63                 void printConfig(void);
+     64          //===== GPIO notification task
+     65          static void gpioSampleTask(void* arg);
+     66          
+     67          //=========================== const ===========================================
+     68          
+     69          const dnm_ucli_cmdDef_t cliCmdDefs[] = {
+     70             {&gpioNet_cli_config,     "config", "config",                     DN_CLI_ACCESS_LOGIN},
+     71             {&gpioNet_cli_lowval,     "lowval", "lowval [newVal]",            DN_CLI_ACCESS_LOGIN},
+     72             {&gpioNet_cli_highval,    "highval","highval [newVal]",           DN_CLI_ACCESS_LOGIN},
+     73             {&gpioNet_cli_period,     "period", "period [newPeriod in ms]",   DN_CLI_ACCESS_LOGIN},
+     74             {NULL,                    NULL,     NULL,                         0},
+     75          };
+     76          
+     77          //=========================== initialization ==================================
+     78          
+     79          /**
+     80           \brief This is the entry point in the application code.
+     81           */
+     82          int p2_init(void) {
+     83             INT8U                     osErr;
+     84             
+     85             //===== initialize module variables
+     86             memset(&gpio_net_app_v,0,sizeof(gpio_net_app_vars_t));
+     87             gpio_net_app_v.lowval     = LOWVAL_DEFAULT;
+     88             gpio_net_app_v.highval    = HIGHVAL_DEFAULT;
+     89             gpio_net_app_v.period     = PERIOD_DEFAULT;
+     90             
+     91             //===== initialize helper tasks
+     92             
+     93             // create a semaphore to indicate mote joined
+     94             gpio_net_app_v.joinedSem = OSSemCreate(0);
+     95             ASSERT (gpio_net_app_v.joinedSem!=NULL);
+     96             
+     97             // CLI task
+     98             cli_task_init(
+     99                "gpio_net",                           // appName
+    100                &cliCmdDefs                           // cliCmds
+    101             );
+    102             
+    103             // local interface task
+    104             loc_task_init(
+    105                JOIN_YES,                             // fJoin
+    106                NULL,                                 // netId
+    107                WKP_GPIO_NET,                         // udpPort
+    108                gpio_net_app_v.joinedSem,             // joinedSem
+    109                BANDWIDTH_NONE,                       // bandwidth
+    110                NULL                                  // serviceSem
+    111             );
+    112             
+    113             //===== create the GPIO sample task
+    114             osErr = OSTaskCreateExt(
+    115                gpioSampleTask,
+    116                (void*) 0,
+    117                (OS_STK*)(&gpio_net_app_v.gpioSampleTaskStack[TASK_APP_GPIOSAMPLE_STK_SIZE- 1]),
+    118                TASK_APP_GPIOSAMPLE_PRIORITY,
+    119                TASK_APP_GPIOSAMPLE_PRIORITY,
+    120                (OS_STK*)gpio_net_app_v.gpioSampleTaskStack,
+    121                TASK_APP_GPIOSAMPLE_STK_SIZE,
+    122                (void*) 0,
+    123                OS_TASK_OPT_STK_CHK | OS_TASK_OPT_STK_CLR
+    124             );
+    125             ASSERT(osErr == OS_ERR_NONE);
+    126             OSTaskNameSet(TASK_APP_GPIOSAMPLE_PRIORITY, (INT8U*)TASK_APP_GPIOSAMPLE_NAME, &osErr);
+    127             ASSERT(osErr == OS_ERR_NONE);
+    128             
+    129             return 0;
+    130          }
+    131          
+    132          //=========================== CLI =============================================
+    133          
+    134          // "config" command
+    135          dn_error_t gpioNet_cli_config(INT8U* buf, INT32U len) {
+    136             printConfig();
+    137             return DN_ERR_NONE;
+    138          }
+    139          
+    140          // "lowval" command
+    141          dn_error_t gpioNet_cli_lowval(INT8U* buf, INT32U len) {
+    142             char*      token;
+    143             int        sarg, l;
+    144             
+    145             //--- param 0: lowval
+    146             l = sscanf (buf, "%d", &sarg);
+    147             if (l < 1) {
+    148                return DN_ERR_INVALID;
+    149             }
+    150             else {
+    151                gpio_net_app_v.lowval = (INT8U)sarg;
+    152             }
+    153             
+    154             // sync configuration to file
+    155             syncToConfigFile();
+    156             
+    157             return DN_ERR_NONE;
+    158          }
+    159          
+    160          // "highval" command
+    161          dn_error_t gpioNet_cli_highval(INT8U* buf, INT32U len) {
+    162             char*      token;
+    163             int        sarg, l;
+    164             
+    165             //--- param 0: highval
+    166             l = sscanf (buf, "%d", &sarg);
+    167             if (l < 1) {
+    168                return DN_ERR_INVALID;
+    169             }
+    170             else {
+    171                gpio_net_app_v.highval = (INT8U)sarg;
+    172             }
+    173             
+    174             // sync configuration to file
+    175             syncToConfigFile();
+    176             
+    177             return DN_ERR_NONE;
+    178          }
+    179          
+    180          // "period" command
+    181          dn_error_t gpioNet_cli_period(INT8U* buf, INT32U len) {
+    182             int        sarg, l;
+    183             
+    184             //--- param 0: period
+    185             l = sscanf (buf, "%d", &sarg);
+    186             if (l < 1) {
+    187                return DN_ERR_INVALID;
+    188             }
+    189             else {
+    190                gpio_net_app_v.period = (INT16U)sarg;
+    191             }
+    192             
+    193             // sync configuration to file
+    194             syncToConfigFile();
+    195             
+    196             return DN_ERR_NONE;
+    197          }
+    198          
+    199          //=========================== configFile ======================================
+    200          
+    201          void initConfigFile(void) {
+    202             dn_error_t                    dnErr;
+    203             INT8U                         fileBytes[sizeof(gpio_net_configFileStruct_t)];
+    204             gpio_net_configFileStruct_t*  fileContents;
+    205             dn_fs_handle_t                configFileHandle;
+    206             
+    207             fileContents = (gpio_net_configFileStruct_t*)fileBytes;
+    208             
+    209             configFileHandle = dn_fs_find(GPIO_NET_CONFIG_FILENAME);
+    210             if (configFileHandle>=0) {
+    211                // file found: read it
+    212                
+    213                // open file
+    214                configFileHandle = dn_fs_open(
+    215                   GPIO_NET_CONFIG_FILENAME,
+    216                   DN_FS_OPT_CREATE,
+    217                   sizeof(gpio_net_configFileStruct_t),
+    218                   DN_FS_MODE_OTH_RW
+    219                );
+    220                ASSERT(configFileHandle >= 0);
+    221                
+    222                // read file
+    223                dnErr = dn_fs_read(
+    224                   configFileHandle,
+    225                   0, // offset
+    226                   (INT8U*)fileContents,
+    227                   sizeof(gpio_net_configFileStruct_t)
+    228                );
+    229                ASSERT(dnErr>=0);
+    230                
+    231                // store configuration read from file into module variable
+    232                gpio_net_app_v.lowval  = fileContents->lowval;
+    233                gpio_net_app_v.highval = fileContents->highval;
+    234                gpio_net_app_v.period  = fileContents->period;
+    235                
+    236                // close file
+    237                dn_fs_close(configFileHandle);
+    238             } else {
+    239                // file not found: create it
+    240                
+    241                // prepare file content
+    242                fileContents->lowval   = gpio_net_app_v.lowval;
+    243                fileContents->highval  = gpio_net_app_v.highval;
+    244                fileContents->period   = gpio_net_app_v.period;
+    245                
+    246                // create file
+    247                configFileHandle = dn_fs_open(
+    248                   GPIO_NET_CONFIG_FILENAME,
+    249                   DN_FS_OPT_CREATE,
+    250                   sizeof(gpio_net_configFileStruct_t),
+    251                   DN_FS_MODE_SHADOW
+    252                );
+    253                ASSERT(configFileHandle >= 0);
+    254                
+    255                // write file
+    256                dnErr = dn_fs_write(
+    257                   configFileHandle,
+    258                   0, // offset
+    259                   (INT8U*)fileContents,
+    260                   sizeof(gpio_net_configFileStruct_t)
+    261                );
+    262                ASSERT(dnErr >= 0);
+    263                
+    264                // close file
+    265                dn_fs_close(configFileHandle);
+    266             }
+    267             
+    268             // print
+    269             printConfig();
+    270          }
+    271          
+    272          void syncToConfigFile(void) {
+    273             dn_error_t                    dnErr;
+    274             INT8U                         fileBytes[sizeof(gpio_net_configFileStruct_t)];
+    275             gpio_net_configFileStruct_t*  fileContents;
+    276             dn_fs_handle_t                configFileHandle;
+    277             
+    278             fileContents = (gpio_net_configFileStruct_t*)fileBytes;
+    279             
+    280             // prepare file content
+    281             fileContents->lowval   = gpio_net_app_v.lowval;
+    282             fileContents->highval  = gpio_net_app_v.highval;
+    283             fileContents->period   = gpio_net_app_v.period;
+    284             
+    285             // open file
+    286             configFileHandle = dn_fs_open(
+    287                GPIO_NET_CONFIG_FILENAME,
+    288                DN_FS_OPT_CREATE,
+    289                sizeof(gpio_net_configFileStruct_t),
+    290                DN_FS_MODE_OTH_RW
+    291             );
+    292             ASSERT(configFileHandle >= 0);
+    293             
+    294             // write file
+    295             dnErr = dn_fs_write(
+    296                configFileHandle,
+    297                0, // offset
+    298                (INT8U*)fileContents,
+    299                sizeof(gpio_net_configFileStruct_t)
+    300             );
+    301             ASSERT(dnErr >= 0);
+    302             
+    303             // close file
+    304             dn_fs_close(configFileHandle);
+    305             
+    306             // print
+    307             printConfig();
+    308          }
+    309          
+    310          void printConfig(void) {
+    311             dnm_ucli_printf("Current config:\r\n");
+    312             dnm_ucli_printf(" - lowval:  %d\r\n",gpio_net_app_v.lowval);
+    313             dnm_ucli_printf(" - highval: %d\r\n",gpio_net_app_v.highval);
+    314             dnm_ucli_printf(" - period:  %d\r\n",gpio_net_app_v.period);
+    315          }
+    316          
+    317          //=========================== GPIO notif task =================================
+    318          
+    319          static void gpioSampleTask(void* arg) {
+    320             dn_error_t                     dnErr;
+    321             INT8U                          osErr;
+    322             dn_gpio_ioctl_cfg_in_t         gpioInCfg;
+    323             dn_gpio_ioctl_cfg_out_t        gpioOutCfg;
+    324             INT8U                          samplePinLevel;
+    325             INT8U                          pkBuf[sizeof(loc_sendtoNW_t) + 1];
+    326             loc_sendtoNW_t*                pkToSend;
+    327             INT8U                          rc;
+    328             INT8U                          ledState;
+    329             
+    330             //===== initialize the configuration file
+    331             initConfigFile();
+    332             
+    333             //===== open and configure the LED pins
+    334             
+    335             dnErr = dn_open(
+    336                LED_GREEN1,                 // device
+    337                NULL,                       // args
+    338                0                           // argLen 
+    339             );
+    340             ASSERT(dnErr==DN_ERR_NONE);
+    341             
+    342             gpioOutCfg.initialLevel = 0x00;
+    343             dnErr = dn_ioctl(
+    344                LED_GREEN1,                 // device
+    345                DN_IOCTL_GPIO_CFG_OUTPUT,   // request
+    346                &gpioOutCfg,                // args
+    347                sizeof(gpioOutCfg)          // argLen
+    348             );
+    349             ASSERT(dnErr==DN_ERR_NONE);
+    350             
+    351             dnErr = dn_open(
+    352                LED_GREEN2,                 // device
+    353                NULL,                       // args
+    354                0                           // argLen 
+    355             );
+    356             ASSERT(dnErr==DN_ERR_NONE);
+    357             
+    358             gpioOutCfg.initialLevel = 0x00;
+    359             dnErr = dn_ioctl(
+    360                LED_GREEN2,                 // device
+    361                DN_IOCTL_GPIO_CFG_OUTPUT,   // request
+    362                &gpioOutCfg,                // args
+    363                sizeof(gpioOutCfg)          // argLen
+    364             );
+    365             ASSERT(dnErr==DN_ERR_NONE);
+    366             
+    367             //===== open and configure the SAMPLE_PIN
+    368             dn_open(
+    369                SAMPLE_PIN,
+    370                NULL,
+    371                0
+    372             );
+    373             gpioInCfg.pullMode = DN_GPIO_PULL_NONE;
+    374             dn_ioctl(
+    375                SAMPLE_PIN,
+    376                DN_IOCTL_GPIO_CFG_INPUT,
+    377                &gpioInCfg,
+    378                sizeof(gpioInCfg)
+    379             );
+    380             
+    381             //===== initialize packet variables
+    382             pkToSend = (loc_sendtoNW_t*)pkBuf;
+    383             
+    384             //===== switch LEDs on
+    385             
+    386             ledState = 0x01;
+    387             dnErr = dn_write(
+    388                LED_GREEN1,                 // device
+    389                &ledState,                  // buf
+    390                sizeof(ledState)            // len
+    391             );
+    392             ASSERT(dnErr==DN_ERR_NONE);
+    393             
+    394             ledState = 0x01;
+    395             dnErr = dn_write(
+    396                LED_GREEN2,                 // device
+    397                &ledState,                  // buf
+    398                sizeof(ledState)            // len
+    399             );
+    400             ASSERT(dnErr==DN_ERR_NONE);
+    401             
+    402             //===== wait for the mote to have joined
+    403             OSSemPend(gpio_net_app_v.joinedSem,0,&osErr);
+    404             ASSERT(osErr == OS_ERR_NONE);
+    405             
+    406             //===== switch LEDs off
+    407             
+    408             ledState = 0x00;
+    409             dnErr = dn_write(
+    410                LED_GREEN1,                 // device
+    411                &ledState,                  // buf
+    412                sizeof(ledState)            // len
+    413             );
+    414             ASSERT(dnErr==DN_ERR_NONE);
+    415             
+    416             ledState = 0x00;
+    417             dnErr = dn_write(
+    418                LED_GREEN2,                 // device
+    419                &ledState,                  // buf
+    420                sizeof(ledState)            // len
+    421             );
+    422             ASSERT(dnErr==DN_ERR_NONE);
+    423             
+    424             while (1) { // this is a task, it executes forever
+    425                
+    426                //===== step 1. sample the state of the SAMPLE_PIN
+    427                
+    428                dn_read(
+    429                   SAMPLE_PIN,
+    430                   &samplePinLevel,
+    431                   sizeof(samplePinLevel)
+    432                );
+    433                
+    434                //===== step 2. send packet
+    435                
+    436                // fill in packet "header"
+    437                pkToSend->locSendTo.socketId          = loc_getSocketId();
+    438                pkToSend->locSendTo.destAddr          = DN_MGR_IPV6_MULTICAST_ADDR;
+    439                pkToSend->locSendTo.destPort          = WKP_GPIO_NET;
+    440                pkToSend->locSendTo.serviceType       = DN_API_SERVICE_TYPE_BW;   
+    441                pkToSend->locSendTo.priority          = DN_API_PRIORITY_MED;   
+    442                pkToSend->locSendTo.packetId          = 0xFFFF;
+    443                
+    444                // fill in the packet payload
+    445                if (samplePinLevel==0) {
+    446                   pkToSend->locSendTo.payload[0]     = gpio_net_app_v.lowval;
+    447                } else {
+    448                   pkToSend->locSendTo.payload[0]     = gpio_net_app_v.highval;
+    449                }
+    450                
+    451                // send the packet
+    452                dnErr = dnm_loc_sendtoCmd(pkToSend, 1, &rc);
+    453                ASSERT (dnErr == DN_ERR_NONE);
+    454                
+    455                // print level
+    456                dnm_ucli_printf("samplePinLevel=%d, sent 0x%02x\r\n",
+    457                   samplePinLevel,
+    458                   pkToSend->locSendTo.payload[0]
+    459                );
+    460                
+    461                //===== step 3. pause until next iteration
+    462                
+    463                // this call blocks the task until the specified timeout expires (in ms)
+    464                OSTimeDly(gpio_net_app_v.period);
+    465             }
+    466          }
+    467          
+    468          //=============================================================================
+    469          //=========================== install a kernel header =========================
+    470          //=============================================================================
+    471          
+    472          /**
+    473           A kernel header is a set of bytes prepended to the actual binary image of this
+    474           application. Thus header is needed for your application to start running.
+    475           */
+    476          
+    477          DN_CREATE_EXE_HDR(DN_VENDOR_ID_NOT_SET,
+    478                            DN_APP_ID_NOT_SET,
+    479                            VER_MAJOR,
+    480                            VER_MINOR,
+    481                            VER_PATCH,
+    482                            VER_BUILD);
+
+   Maximum stack usage in bytes:
+
+   .cstack Function
+   ------- --------
+       8   gpioNet_cli_config
+         8   -> dnm_ucli_printf
+       8   gpioNet_cli_highval
+         8   -> sscanf
+         8   -> syncToConfigFile
+       8   gpioNet_cli_lowval
+         8   -> sscanf
+         8   -> syncToConfigFile
+       8   gpioNet_cli_period
+         8   -> sscanf
+         8   -> syncToConfigFile
+      56   gpioSampleTask
+        56   -> OSSemPend
+        56   -> OSTimeDly
+        56   -> __aeabi_memcpy
+        56   -> assert_handler
+        56   -> dn_ioctl
+        56   -> dn_open
+        56   -> dn_read
+        56   -> dn_write
+        56   -> dnm_loc_sendtoCmd
+        56   -> dnm_ucli_printf
+        56   -> initConfigFile
+        56   -> loc_getSocketId
+      16   initConfigFile
+        16   -> assert_handler
+        16   -> dn_fs_close
+        16   -> dn_fs_find
+        16   -> dn_fs_open
+        16   -> dn_fs_read
+        16   -> dn_fs_write
+        16   -> printConfig
+      40   p2_init
+        40   -> OSSemCreate
+        40   -> OSTaskCreateExt
+        40   -> OSTaskNameSet
+        40   -> __aeabi_memclr4
+        40   -> assert_handler
+        40   -> cli_task_init
+        40   -> loc_task_init
+       8   printConfig
+         0   -> dnm_ucli_printf
+         8   -> dnm_ucli_printf
+      16   syncToConfigFile
+        16   -> assert_handler
+        16   -> dn_fs_close
+        16   -> dn_fs_open
+        16   -> dn_fs_write
+        16   -> printConfig
+
+
+   Section sizes:
+
+   Bytes  Function/Label
+   -----  --------------
+       4  ??DataTable25
+       4  ??DataTable25_1
+       4  ??DataTable25_2
+       4  ??DataTable25_3
+       4  ??DataTable25_4
+       8  ?Subroutine0
+       6  ?Subroutine1
+      12  ?Subroutine2
+       8  ?_0
+       8  ?_1
+       4  ?_10
+      16  ?_11
+      20  ?_12
+      20  ?_13
+      20  ?_14
+      20  ?_15
+      36  ?_16
+      16  ?_2
+       8  ?_3
+      20  ?_4
+       8  ?_5
+      28  ?_6
+      16  ?_7
+      12  ?_8
+      12  ?_9
+      80  cliCmdDefs
+      46  gpioNet_cli_config
+      26  gpioNet_cli_highval
+      26  gpioNet_cli_lowval
+      26  gpioNet_cli_period
+     410  gpioSampleTask
+    1032  gpio_net_app_v
+     168  initConfigFile
+      32  kernelExeHdr
+     178  p2_init
+      46  printConfig
+      82  syncToConfigFile
+
+ 
+ 1 032 bytes in section .bss
+    32 bytes in section .kernel_exe_hdr
+   100 bytes in section .rodata
+ 1 306 bytes in section .text
+ 
+ 1 306 bytes of CODE  memory
+   132 bytes of CONST memory
+ 1 032 bytes of DATA  memory
+
+Errors: none
+Warnings: none
