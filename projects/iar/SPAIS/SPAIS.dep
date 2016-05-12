@@ -2,167 +2,188 @@
 
 <project>
   <fileVersion>2</fileVersion>
-  <fileChecksum>1903482660</fileChecksum>
+  <fileChecksum>1900589031</fileChecksum>
   <configuration>
     <name>Debug</name>
     <outputs>
-      <file>$PROJ_DIR$\..\..\..\src\app\common\cli_task.h</file>
-      <file>$PROJ_DIR$\..\..\..\src\app\common\loc_task.c</file>
-      <file>$PROJ_DIR$\..\..\..\src\app\common\build.h</file>
-      <file>$PROJ_DIR$\..\..\..\src\app\common\cli_task.c</file>
-      <file>$PROJ_DIR$\..\..\..\src\app\common\loc_task.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\cli_task.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\src\app\common\Ver.h</file>
       <file>$PROJ_DIR$\..\..\..\src\app\common\app_cfg.h</file>
-      <file>$TOOLKIT_DIR$\inc\c\ysizet.h</file>
-      <file>$PROJ_DIR$\Debug\Obj\hello_common_app.pbi</file>
-      <file>$TOOLKIT_DIR$\inc\c\DLib_Product_string.h</file>
-      <file>$TOOLKIT_DIR$\inc\c\stddef.h</file>
-      <file>$PROJ_DIR$\Debug\Obj\hello_app.__cstat.et</file>
+      <file>$PROJ_DIR$\..\..\..\src\app\common\cli_task.c</file>
+      <file>$PROJ_DIR$\..\..\..\src\app\common\cli_task.h</file>
+      <file>$PROJ_DIR$\..\..\..\src\app\common\loc_task.h</file>
+      <file>$PROJ_DIR$\..\..\..\src\app\common\build.h</file>
+      <file>$PROJ_DIR$\..\..\..\src\app\common\loc_task.c</file>
+      <file>$PROJ_DIR$\Debug\List\moisture_sense.lst</file>
       <file>$PROJ_DIR$\Debug\Obj\dnm_local.__cstat.et</file>
-      <file>$PROJ_DIR$\Debug\List\dnm_rate_ctrl.lst</file>
-      <file>$PROJ_DIR$\Debug\List\dnm_ucli.lst</file>
-      <file>$PROJ_DIR$\Debug\List\loc_task.lst</file>
-      <file>$PROJ_DIR$\Debug\Obj\dnm_ucli.__cstat.et</file>
-      <file>$PROJ_DIR$\Debug\List\dnm_service.lst</file>
+      <file>$TOOLKIT_DIR$\inc\c\stddef.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\ysizet.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\DLib_Product_string.h</file>
       <file>$PROJ_DIR$\Debug\Obj\loc_task.__cstat.et</file>
-      <file>$PROJ_DIR$\Debug\Obj\hello_common_app.o</file>
-      <file>$PROJ_DIR$\Debug\List\cli_task.lst</file>
-      <file>$PROJ_DIR$\Debug\Obj\cli_task.__cstat.et</file>
-      <file>$TOOLKIT_DIR$\inc\c\string.h</file>
-      <file>$PROJ_DIR$\Debug\List\gpio_net_app.lst</file>
-      <file>$PROJ_DIR$\..\..\..\src\inc\dn_api_param.h</file>
-      <file>$PROJ_DIR$\..\..\..\src\inc\dn_channel.h</file>
-      <file>$PROJ_DIR$\..\..\..\src\inc\dn_cli.h</file>
-      <file>$PROJ_DIR$\..\..\..\src\inc\dn_flash_info.h</file>
-      <file>$PROJ_DIR$\..\..\..\src\inc\dn_common.h</file>
-      <file>$PROJ_DIR$\..\..\..\src\inc\dn_fs.h</file>
-      <file>$PROJ_DIR$\..\..\..\src\inc\dn_gpio.h</file>
-      <file>$PROJ_DIR$\..\..\..\src\inc\dn_api_common.h</file>
-      <file>$PROJ_DIR$\..\..\..\src\inc\dn_errno.h</file>
-      <file>$PROJ_DIR$\..\..\..\src\app\common\well_known_ports.h</file>
-      <file>$PROJ_DIR$\..\..\..\src\inc\dn_api_local.h</file>
-      <file>$PROJ_DIR$\..\..\..\src\inc\dn_typedef.h</file>
-      <file>$PROJ_DIR$\..\..\..\src\inc\dn_system.h</file>
-      <file>$PROJ_DIR$\..\..\..\src\inc\dn_pack.h</file>
-      <file>$PROJ_DIR$\..\..\..\src\inc\dn_mesh.h</file>
-      <file>$TOOLKIT_DIR$\inc\c\DLib_Threads.h</file>
-      <file>$TOOLKIT_DIR$\inc\c\DLib_Config_Normal.h</file>
-      <file>$TOOLKIT_DIR$\inc\c\ystdio.h</file>
-      <file>$PROJ_DIR$\Debug\Obj\dnm_rate_ctrl.__cstat.et</file>
-      <file>$TOOLKIT_DIR$\inc\c\yvals.h</file>
-      <file>$PROJ_DIR$\Debug\Obj\dnm_service.__cstat.et</file>
-      <file>$TOOLKIT_DIR$\inc\c\ycheck.h</file>
-      <file>$TOOLKIT_DIR$\inc\c\stdio.h</file>
-      <file>$PROJ_DIR$\..\..\..\tools\linker_configuration\Eterna.icf</file>
-      <file>$TOOLKIT_DIR$\inc\c\DLib_Product.h</file>
-      <file>$TOOLKIT_DIR$\lib\dl7M_tln.a</file>
-      <file>$PROJ_DIR$\..\all_projects.iarinc</file>
-      <file>$PROJ_DIR$\..\..\..\src\app\00-hello_common\hello_common_app.c</file>
-      <file>$PROJ_DIR$\Debug\Obj\dnm_service.o</file>
-      <file>$PROJ_DIR$\Debug\Obj\dnm_ucli.pbi</file>
-      <file>$PROJ_DIR$\Debug\Obj\dnm_rate_ctrl.o</file>
-      <file>$PROJ_DIR$\Debug\Exe\ocfdk_00_hello.out</file>
-      <file>$PROJ_DIR$\Debug\Obj\loc_task.pbi</file>
+      <file>$PROJ_DIR$\Debug\List\dnm_service.lst</file>
+      <file>$PROJ_DIR$\Debug\Obj\dnm_ucli.__cstat.et</file>
       <file>$PROJ_DIR$\Debug\Obj\cli_task.o</file>
-      <file>$PROJ_DIR$\Debug\Obj\SPAIS.pbd</file>
-      <file>$PROJ_DIR$\Debug\List\hello_app.lst</file>
+      <file>$PROJ_DIR$\Debug\List\dnm_rate_ctrl.lst</file>
       <file>$PROJ_DIR$\Debug\Obj\dnm_service.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\loc_task.pbi</file>
       <file>$PROJ_DIR$\Debug\List\dnm_local.lst</file>
+      <file>$PROJ_DIR$\Debug\List\loc_task.lst</file>
+      <file>$PROJ_DIR$\..\..\..\src\app\00-hello_common\hello_common_app.c</file>
+      <file>$PROJ_DIR$\Debug\List\dnm_ucli.lst</file>
+      <file>$PROJ_DIR$\Debug\Obj\dnm_rate_ctrl.__cstat.et</file>
+      <file>$PROJ_DIR$\Debug\Obj\hello_common_app.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\hello_app.__cstat.et</file>
+      <file>$PROJ_DIR$\Debug\List\main.lst</file>
+      <file>$PROJ_DIR$\Debug\Obj\cli_task.__cstat.et</file>
+      <file>$PROJ_DIR$\Debug\Obj\dnm_ucli.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\hello_common_app.o</file>
+      <file>$PROJ_DIR$\Debug\Obj\SPAIS.pbd</file>
       <file>$TOOLKIT_DIR$\lib\rt7M_tl.a</file>
       <file>$TOOLKIT_DIR$\lib\m7M_tl.a</file>
-      <file>$TOOLKIT_DIR$\inc\c\stdarg.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\DLib_Threads.h</file>
+      <file>$TOOLKIT_DIR$\lib\dl7M_tln.a</file>
+      <file>$PROJ_DIR$\Debug\Obj\dnm_rate_ctrl.o</file>
+      <file>$PROJ_DIR$\Debug\Obj\dnm_service.__cstat.et</file>
+      <file>$TOOLKIT_DIR$\inc\c\string.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\DLib_Product.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\main.__cstat.et</file>
+      <file>$TOOLKIT_DIR$\inc\c\ycheck.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\yvals.h</file>
+      <file>$PROJ_DIR$\..\..\..\tools\linker_configuration\Eterna.icf</file>
+      <file>$PROJ_DIR$\Debug\Obj\moisture_sense.o</file>
+      <file>$PROJ_DIR$\..\all_projects.iarinc</file>
+      <file>$PROJ_DIR$\Debug\List\gpio_net_app.lst</file>
+      <file>$PROJ_DIR$\Debug\List\cli_task.lst</file>
+      <file>$PROJ_DIR$\Debug\Exe\ocfdk_00_hello.out</file>
+      <file>$TOOLKIT_DIR$\inc\c\ystdio.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\stdio.h</file>
+      <file>$PROJ_DIR$\Debug\List\hello_app.lst</file>
+      <file>$PROJ_DIR$\Debug\Obj\moisture_sense.__cstat.et</file>
+      <file>$TOOLKIT_DIR$\inc\c\DLib_Config_Normal.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\dnm_service.o</file>
+      <file>$PROJ_DIR$\..\..\..\src\inc\dn_flash_info.h</file>
+      <file>$PROJ_DIR$\..\..\..\src\inc\dn_fs.h</file>
+      <file>$PROJ_DIR$\..\..\..\src\inc\dn_gpio.h</file>
+      <file>$PROJ_DIR$\..\..\..\src\inc\dn_pack.h</file>
+      <file>$PROJ_DIR$\..\..\..\src\inc\dn_system.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\hello_app.o</file>
+      <file>$PROJ_DIR$\..\..\..\src\inc\dn_mesh.h</file>
+      <file>$PROJ_DIR$\..\..\..\src\inc\dn_channel.h</file>
+      <file>$PROJ_DIR$\..\..\..\src\inc\dn_adc.h</file>
+      <file>$PROJ_DIR$\..\..\..\src\inc\dn_api_local.h</file>
+      <file>$PROJ_DIR$\..\..\..\src\inc\dn_errno.h</file>
+      <file>$PROJ_DIR$\..\..\..\src\app\spais\main.c</file>
+      <file>$PROJ_DIR$\..\..\..\src\inc\dn_common.h</file>
+      <file>$PROJ_DIR$\..\..\..\src\app\common\well_known_ports.h</file>
+      <file>$PROJ_DIR$\..\..\..\src\inc\dn_api_param.h</file>
+      <file>$PROJ_DIR$\..\..\..\src\app\spais\main_cfg.h</file>
+      <file>$PROJ_DIR$\..\..\..\src\app\spais\moisture_sense.c</file>
+      <file>$PROJ_DIR$\..\..\..\src\inc\dn_cli.h</file>
+      <file>$PROJ_DIR$\..\..\..\src\app\spais\moisture_sense_cfg.h</file>
+      <file>$PROJ_DIR$\..\..\..\src\inc\dn_api_common.h</file>
+      <file>$PROJ_DIR$\..\..\..\src\modules\ip_applib\dnm_service.c</file>
+      <file>$PROJ_DIR$\..\..\..\src\modules\ip_applib\dnm_local.c</file>
+      <file>$PROJ_DIR$\..\..\..\src\modules\ip_applib\dnm_service.h</file>
+      <file>$PROJ_DIR$\Debug\Exe\ocfdk_spais.out</file>
+      <file>$PROJ_DIR$\Debug\Obj\gpio_app.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\src\modules\clilib\dnm_ucli.c</file>
+      <file>$PROJ_DIR$\Debug\Obj\gpio_app.o</file>
+      <file>$PROJ_DIR$\Debug\Obj\main.o</file>
+      <file>$PROJ_DIR$\..\..\..\src\modules\ip_applib\dnm_rate_ctrl.c</file>
+      <file>$PROJ_DIR$\..\..\..\src\lib\libucos_full.a</file>
+      <file>$PROJ_DIR$\..\..\..\src\inc\os_cfg.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\main.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\src\inc\ucos_ii.h</file>
+      <file>$PROJ_DIR$\..\..\..\src\modules\clilib\dnm_ucli.h</file>
+      <file>$PROJ_DIR$\..\..\..\src\lib\libip_stack.a</file>
+      <file>$PROJ_DIR$\..\..\..\src\modules\ip_applib\dnm_rate_ctrl.h</file>
+      <file>$PROJ_DIR$\..\..\..\src\inc\dn_typedef.h</file>
+      <file>$PROJ_DIR$\..\..\..\src\inc\os_cpu.h</file>
+      <file>$PROJ_DIR$\..\..\..\src\modules\ip_applib\dnm_local.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\dnm_rate_ctrl.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\src\app\02-gpio_net\gpio_net_app.c</file>
+      <file>$PROJ_DIR$\Debug\Obj\hello_app.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\dnm_ucli.o</file>
+      <file>$PROJ_DIR$\Debug\List\gpio_app.lst</file>
+      <file>$PROJ_DIR$\Debug\Obj\gpio_net_app.o</file>
+      <file>$PROJ_DIR$\..\..\..\src\app\00-hello\app_task_cfg.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\dnm_local.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\gpio_app.__cstat.et</file>
+      <file>$PROJ_DIR$\..\..\..\src\app\00-hello\hello_app.c</file>
+      <file>$PROJ_DIR$\Debug\Obj\dnm_local.o</file>
       <file>$TOOLKIT_DIR$\inc\c\DLib_Defaults.h</file>
       <file>$PROJ_DIR$\..\..\..\src\inc\dn_exe_hdr.h</file>
-      <file>$TOOLKIT_DIR$\inc\c\xencoding_limits.h</file>
-      <file>$PROJ_DIR$\Debug\List\ocfdk_00_hello.map</file>
-      <file>$PROJ_DIR$\..\..\..\src\modules\clilib\dnm_ucli.c</file>
-      <file>$PROJ_DIR$\..\..\..\src\modules\ip_applib\dnm_rate_ctrl.h</file>
-      <file>$PROJ_DIR$\..\..\..\src\inc\ucos_ii.h</file>
-      <file>$PROJ_DIR$\Debug\Obj\cli_task.pbi</file>
-      <file>$PROJ_DIR$\Debug\Obj\dnm_local.pbi</file>
-      <file>$PROJ_DIR$\Debug\Obj\dnm_rate_ctrl.pbi</file>
-      <file>$PROJ_DIR$\Debug\Obj\dnm_ucli.o</file>
-      <file>$PROJ_DIR$\..\..\..\src\inc\os_cpu.h</file>
-      <file>$PROJ_DIR$\..\..\..\src\lib\libip_stack.a</file>
-      <file>$PROJ_DIR$\..\..\..\src\modules\ip_applib\dnm_rate_ctrl.c</file>
-      <file>$PROJ_DIR$\..\..\..\src\app\00-hello\app_task_cfg.h</file>
-      <file>$PROJ_DIR$\..\..\..\src\app\00-hello\hello_app.c</file>
-      <file>$PROJ_DIR$\..\..\..\src\inc\os_cfg.h</file>
-      <file>$PROJ_DIR$\Debug\Obj\hello_app.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\src\modules\ip_applib\dnm_service.c</file>
+      <file>$PROJ_DIR$\Debug\Obj\moisture_sense.pbi</file>
       <file>$PROJ_DIR$\Debug\Obj\loc_task.o</file>
-      <file>$PROJ_DIR$\..\..\..\src\modules\ip_applib\dnm_service.h</file>
-      <file>$PROJ_DIR$\Debug\Obj\dnm_local.o</file>
-      <file>$PROJ_DIR$\Debug\Obj\hello_app.o</file>
-      <file>$PROJ_DIR$\..\..\..\src\lib\libucos_full.a</file>
-      <file>$PROJ_DIR$\..\..\..\src\modules\ip_applib\dnm_local.c</file>
-      <file>$PROJ_DIR$\..\..\..\src\modules\clilib\dnm_ucli.h</file>
-      <file>$PROJ_DIR$\..\..\..\src\modules\ip_applib\dnm_local.h</file>
-      <file>$PROJ_DIR$\Debug\Obj\gpio_app.__cstat.et</file>
-      <file>$PROJ_DIR$\..\..\..\src\app\common\Ver.h</file>
-      <file>$PROJ_DIR$\..\..\..\src\app\02-gpio_net\gpio_net_app.c</file>
-      <file>$PROJ_DIR$\..\..\..\src\app\02-gpio_net\app_task_cfg.h</file>
-      <file>$PROJ_DIR$\Debug\Obj\gpio_net_app.o</file>
       <file>$PROJ_DIR$\Debug\Obj\gpio_net_app.pbi</file>
-      <file>$PROJ_DIR$\..\..\..\src\app\02-gpio\gpio_app.c</file>
-      <file>$PROJ_DIR$\..\..\..\src\app\02-gpio\app_task_cfg.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\xencoding_limits.h</file>
       <file>$PROJ_DIR$\Debug\Obj\gpio_net_app.__cstat.et</file>
-      <file>$PROJ_DIR$\Debug\Obj\gpio_app.pbi</file>
-      <file>$PROJ_DIR$\Debug\List\gpio_app.lst</file>
-      <file>$PROJ_DIR$\Debug\Obj\gpio_app.o</file>
+      <file>$PROJ_DIR$\..\..\..\src\app\02-gpio\app_task_cfg.h</file>
       <file>$PROJ_DIR$\Debug\List\ocfdk_spais.map</file>
-      <file>$PROJ_DIR$\Debug\Exe\ocfdk_spais.out</file>
+      <file>$PROJ_DIR$\..\..\..\src\app\02-gpio\gpio_app.c</file>
+      <file>$PROJ_DIR$\..\..\..\src\app\02-gpio_net\app_task_cfg.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\stdarg.h</file>
     </outputs>
     <file>
-      <name>$PROJ_DIR$\..\..\..\src\app\common\loc_task.c</name>
+      <name>[ROOT_NODE]</name>
       <outputs>
         <tool>
-          <name>BICOMP</name>
-          <file> 55</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 14 83</file>
-        </tool>
-        <tool>
-          <name>__cstat</name>
-          <file> 17</file>
+          <name>ILINK</name>
+          <file> 78 113</file>
         </tool>
       </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 30 24 90 34 64 44 31 27 75 47 37 36 4 23 9 70 42 66 39 80 63 6 38 5 89 25 33</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 49 27 9 44 42 64 39 47 66 38 6 34 75 70 5 80 4 89 31 25 36 24 90 33 30 37 23</file>
-        </tool>
-      </inputs>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\src\app\common\cli_task.c</name>
       <outputs>
         <tool>
           <name>BICOMP</name>
-          <file> 71</file>
+          <file> 0</file>
         </tool>
         <tool>
           <name>ICCARM</name>
-          <file> 19 56</file>
+          <file> 47 16</file>
         </tool>
         <tool>
           <name>__cstat</name>
-          <file> 20</file>
+          <file> 28</file>
         </tool>
       </outputs>
       <inputs>
         <tool>
           <name>BICOMP</name>
-          <file> 70 35 42 38 44 75 80 31 21 0 9 6 27 89 92 8 64 66 39 47 34 5 63 36 25 24 2</file>
+          <file> 87 59 42 34 41 92 85 65 38 4 10 11 67 88 1 12 105 110 53 39 91 2 116 58 72 62 6</file>
         </tool>
         <tool>
           <name>ICCARM</name>
-          <file> 49 21 44 42 64 39 47 66 38 6 8 27 9 34 75 70 5 80 35 89 31 25 36 24 0 92 2</file>
+          <file> 45 38 41 42 105 53 39 110 34 11 12 67 10 91 92 87 2 85 59 88 65 72 58 62 4 1 6</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\src\app\common\loc_task.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 19</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 21 108</file>
+        </tool>
+        <tool>
+          <name>__cstat</name>
+          <file> 13</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 74 62 93 91 105 41 65 67 92 39 61 58 5 69 10 87 42 110 53 85 116 11 34 2 88 72 64</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 45 67 10 41 42 105 53 39 110 34 11 91 92 87 2 85 5 88 65 72 58 62 93 64 74 61 69</file>
         </tool>
       </inputs>
     </file>
@@ -171,17 +192,17 @@
       <outputs>
         <tool>
           <name>BICOMP</name>
-          <file> 7</file>
+          <file> 25</file>
         </tool>
         <tool>
           <name>ICCARM</name>
-          <file> 18</file>
+          <file> 30</file>
         </tool>
       </outputs>
       <inputs>
         <tool>
           <name>BICOMP</name>
-          <file> 31 44 5 25 0 70 38 42 36 27 92 9 6 75 34 33 30 65 4 64 66 39 47 80 89 24 90 37 63 2</file>
+          <file> 65 41 2 72 4 87 34 42 58 67 1 10 11 92 91 64 74 106 5 105 110 53 39 85 88 62 93 61 116 6</file>
         </tool>
       </inputs>
     </file>
@@ -190,7 +211,130 @@
       <inputs>
         <tool>
           <name>ILINK</name>
-          <file> 46 56 85 53 51 74 95 76 87 83 61 62 48</file>
+          <file> 43 16 104 36 54 97 99 89 84 108 32 33 35</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\src\app\spais\main.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 86</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 27 82</file>
+        </tool>
+        <tool>
+          <name>__cstat</name>
+          <file> 40</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 58 91 57 70 105 41 92 88 50 106 39 42 62 65 67 5 56 1 110 53 2 11 72 87 93 74 61 38 4 59 63 68 73 10 34 85 12 49 116 64 6</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 45 67 10 41 42 105 53 39 110 34 11 91 92 87 2 85 38 12 50 49 4 88 65 72 58 62 5 93 64 74 61 59 57 56 63 106 68 1 6 70 73</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\src\app\spais\moisture_sense.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 107</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 8 44</file>
+        </tool>
+        <tool>
+          <name>__cstat</name>
+          <file> 52</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 91 61 57 49 58 10 11 92 85 12 67 88 50 106 41 42 116 5 56 1 87 34 65 62 64 74 38 4 59 93 63 68 73 105 110 53 39 2 72 6</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 45 67 10 41 42 105 53 39 110 34 11 91 92 87 2 85 38 12 50 49 4 88 65 72 58 62 5 93 64 74 61 59 57 56 63 106 68 1 6 73</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\src\modules\ip_applib\dnm_service.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 18</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 14 54</file>
+        </tool>
+        <tool>
+          <name>__cstat</name>
+          <file> 37</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 72 92 91 58 39 74 62 77 2 105 41 93 88 65 87 85 110 53 61 116 42 34 64</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 45 77 91 92 65 62 87 2 85 58 88 72 93 64 74 61</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\src\modules\ip_applib\dnm_local.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 101</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 20 104</file>
+        </tool>
+        <tool>
+          <name>__cstat</name>
+          <file> 9</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 105 41 91 62 74 93 12 2 64 38 88 11 110 39 92 65 67 42 53 58 61 72 34 87 85 116 10</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 45 38 41 42 105 53 39 110 34 11 12 62 65 92 87 2 91 85 58 93 64 74 61 88 72 67 10</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\Debug\Exe\ocfdk_spais.out</name>
+      <outputs>
+        <tool>
+          <name>ILINK</name>
+          <file> 113</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ILINK</name>
+          <file> 43 16 104 36 54 97 89 84 108 82 44 32 33 35</file>
         </tool>
       </inputs>
     </file>
@@ -199,11 +343,11 @@
       <outputs>
         <tool>
           <name>BICOMP</name>
-          <file> 52</file>
+          <file> 29</file>
         </tool>
         <tool>
           <name>ICCARM</name>
-          <file> 13 74</file>
+          <file> 23 97</file>
         </tool>
         <tool>
           <name>__cstat</name>
@@ -213,11 +357,11 @@
       <inputs>
         <tool>
           <name>BICOMP</name>
-          <file> 40 42 29 44 27 9 6 70 45 24 66 39 25 21 89 35 26 64 47 75 80 34 36 31 38 8 5 63</file>
+          <file> 49 42 57 41 67 10 11 87 50 62 110 53 72 38 88 59 55 105 39 92 85 91 58 65 34 12 2 116</file>
         </tool>
         <tool>
           <name>ICCARM</name>
-          <file> 49 45 44 42 64 39 47 66 38 6 40 21 8 27 9 34 75 70 5 80 89 31 25 36 24 35 29 26</file>
+          <file> 45 50 41 42 105 53 39 110 34 11 49 38 12 67 10 91 92 87 2 85 88 65 72 58 62 59 57 55</file>
         </tool>
       </inputs>
     </file>
@@ -226,25 +370,52 @@
       <outputs>
         <tool>
           <name>BICOMP</name>
-          <file> 73</file>
+          <file> 94</file>
         </tool>
         <tool>
           <name>ICCARM</name>
-          <file> 12 53</file>
+          <file> 17 36</file>
         </tool>
         <tool>
           <name>__cstat</name>
-          <file> 41</file>
+          <file> 24</file>
         </tool>
       </outputs>
       <inputs>
         <tool>
           <name>BICOMP</name>
-          <file> 75 25 34 47 89 36 69 24 5 64 44 90 31 70 80 66 39 30 37 63 42 38 33</file>
+          <file> 92 72 91 39 88 58 90 62 2 105 41 93 65 87 85 110 53 74 61 116 42 34 64</file>
         </tool>
         <tool>
           <name>ICCARM</name>
-          <file> 49 69 34 75 31 24 70 5 80 36 89 25 90 33 30 37</file>
+          <file> 45 90 91 92 65 62 87 2 85 58 88 72 93 64 74 61</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\src\app\02-gpio_net\gpio_net_app.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 109</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 46 99</file>
+        </tool>
+        <tool>
+          <name>__cstat</name>
+          <file> 111</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 41 57 61 42 116 50 68 10 11 92 85 12 49 67 91 58 88 5 56 1 87 34 65 62 64 74 38 4 59 93 106 115 105 110 53 39 2 72 6</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 45 67 10 41 42 105 53 39 110 34 11 91 92 87 2 85 38 12 50 49 4 88 65 72 58 62 5 93 64 74 61 59 57 56 106 68 115 1 6</file>
         </tool>
       </inputs>
     </file>
@@ -253,115 +424,25 @@
       <outputs>
         <tool>
           <name>BICOMP</name>
-          <file> 81</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 58 86</file>
-        </tool>
-        <tool>
-          <name>__cstat</name>
-          <file> 10</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 34 64 44 30 89 47 31 33 27 78 75 42 66 39 80 25 65 90 92 9 70 6 38 5 24 36 37 63 2</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 49 27 9 44 42 64 39 47 66 38 6 34 75 70 5 80 65 36 89 31 25 24 90 33 30 37 78 92 2</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\src\modules\ip_applib\dnm_service.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 59</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 16 51</file>
-        </tool>
-        <tool>
-          <name>__cstat</name>
-          <file> 43</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 25 75 34 36 47 30 24 84 5 64 44 90 89 31 70 80 66 39 37 63 42 38 33</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 49 84 34 75 31 24 70 5 80 36 89 25 90 33 30 37</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\src\modules\ip_applib\dnm_local.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 72</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 60 85</file>
-        </tool>
-        <tool>
-          <name>__cstat</name>
-          <file> 11</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 64 44 34 24 30 90 8 5 33 21 89 6 66 47 75 31 27 42 39 36 37 25 38 70 80 63 9</file>
-        </tool>
-        <tool>
-          <name>ICCARM</name>
-          <file> 49 21 44 42 64 39 47 66 38 6 8 24 31 75 70 5 34 80 36 90 33 30 37 89 25 27 9</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>[ROOT_NODE]</name>
-      <outputs>
-        <tool>
-          <name>ILINK</name>
-          <file> 104 103</file>
-        </tool>
-      </outputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\src\app\02-gpio_net\gpio_net_app.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
           <file> 96</file>
         </tool>
         <tool>
           <name>ICCARM</name>
-          <file> 22 95</file>
+          <file> 51 60</file>
         </tool>
         <tool>
           <name>__cstat</name>
-          <file> 99</file>
+          <file> 26</file>
         </tool>
       </outputs>
       <inputs>
         <tool>
           <name>BICOMP</name>
-          <file> 44 29 37 42 63 45 32 9 6 75 80 8 40 27 34 36 89 4 28 92 70 38 31 24 33 30 21 0 35 90 65 94 64 66 39 47 5 25 2</file>
+          <file> 91 105 41 74 88 39 65 64 67 100 92 42 110 53 85 72 106 93 1 10 87 11 34 2 62 58 61 116 6</file>
         </tool>
         <tool>
           <name>ICCARM</name>
-          <file> 49 27 9 44 42 64 39 47 66 38 6 34 75 70 5 80 21 8 45 40 0 89 31 25 36 24 4 90 33 30 37 35 29 28 65 32 94 92 2</file>
+          <file> 45 67 10 41 42 105 53 39 110 34 11 91 92 87 2 85 106 58 88 65 72 62 93 64 74 61 100 1 6</file>
         </tool>
       </inputs>
     </file>
@@ -370,47 +451,28 @@
       <outputs>
         <tool>
           <name>BICOMP</name>
-          <file> 100</file>
+          <file> 79</file>
         </tool>
         <tool>
           <name>ICCARM</name>
-          <file> 101 102</file>
+          <file> 98 81</file>
         </tool>
         <tool>
           <name>__cstat</name>
-          <file> 91</file>
+          <file> 102</file>
         </tool>
       </outputs>
       <inputs>
         <tool>
           <name>BICOMP</name>
-          <file> 31 44 98 24 4 9 6 75 89 27 35 70 38 33 30 34 0 29 65 92 42 64 66 39 47 80 63 36 37 5 25 90 2</file>
+          <file> 65 41 112 62 5 10 11 92 88 67 59 87 34 64 74 91 4 57 106 1 42 105 110 53 39 85 116 58 61 2 72 93 6</file>
         </tool>
         <tool>
           <name>ICCARM</name>
-          <file> 49 27 9 44 42 64 39 47 66 38 6 34 75 70 5 80 0 89 31 25 36 24 4 90 33 30 37 29 35 65 98 92 2</file>
+          <file> 45 67 10 41 42 105 53 39 110 34 11 91 92 87 2 85 4 88 65 72 58 62 5 93 64 74 61 57 59 106 112 1 6</file>
         </tool>
       </inputs>
     </file>
-    <file>
-      <name>$PROJ_DIR$\Debug\Exe\ocfdk_spais.out</name>
-      <outputs>
-        <tool>
-          <name>ILINK</name>
-          <file> 103</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>ILINK</name>
-          <file> 46 56 85 53 51 74 102 76 87 83 61 62 48</file>
-        </tool>
-      </inputs>
-    </file>
-    <forcedrebuild>
-      <name>[MULTI_TOOL]</name>
-      <tool>ILINK</tool>
-    </forcedrebuild>
   </configuration>
 </project>
 

@@ -18,7 +18,7 @@
           
           
           
-        <Column0>411</Column0><Column1>27</Column1><Column2>27</Column2><Column3>27</Column3></ColumnWidths>
+        <Column0>259</Column0><Column1>27</Column1><Column2>27</Column2><Column3>27</Column3></ColumnWidths>
       </Workspace>
     </Static>
     <Windows>
@@ -32,7 +32,7 @@
             <Factory>Workspace</Factory>
             <Session>
               
-            <NodeDict><ExpandedNode>SPAIS</ExpandedNode><ExpandedNode>SPAIS/app</ExpandedNode><ExpandedNode>SPAIS/app/00-hello</ExpandedNode><ExpandedNode>SPAIS/app/00-hello_common</ExpandedNode><ExpandedNode>SPAIS/app/00-hello_common/hello_common_app.c</ExpandedNode><ExpandedNode>SPAIS/app/02-gpio</ExpandedNode><ExpandedNode>SPAIS/app/02-gpio_net</ExpandedNode></NodeDict></Session>
+            <NodeDict><ExpandedNode>SPAIS</ExpandedNode><ExpandedNode>SPAIS/app</ExpandedNode><ExpandedNode>SPAIS/app/00-hello</ExpandedNode><ExpandedNode>SPAIS/app/00-hello_common</ExpandedNode><ExpandedNode>SPAIS/app/00-hello_common/hello_common_app.c</ExpandedNode><ExpandedNode>SPAIS/app/02-gpio</ExpandedNode><ExpandedNode>SPAIS/app/02-gpio_net</ExpandedNode><ExpandedNode>SPAIS/app/common</ExpandedNode><ExpandedNode>SPAIS/app/spais</ExpandedNode></NodeDict></Session>
           </Tab>
         </Tabs>
         
@@ -52,14 +52,14 @@
       
       
       
-    <Pane/><ActivePane>0</ActivePane><Sizes><Pane><X>1000000</X><Y>1000000</Y></Pane></Sizes><SplitMode>1</SplitMode></Editor>
+    <Pane><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\..\src\app\spais\moisture_sense.c</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>0</SelStart><SelEnd>0</SelEnd><XPos2>0</XPos2><YPos2>37</YPos2><SelStart2>0</SelStart2><SelEnd2>0</SelEnd2></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\..\src\app\common\app_cfg.h</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>0</SelStart><SelEnd>0</SelEnd><XPos2>0</XPos2><YPos2>0</YPos2><SelStart2>0</SelStart2><SelEnd2>0</SelEnd2></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\..\src\app\spais\main.c</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>0</SelStart><SelEnd>0</SelEnd><XPos2>0</XPos2><YPos2>0</YPos2><SelStart2>0</SelStart2><SelEnd2>0</SelEnd2></Tab><ActiveTab>2</ActiveTab></Pane><ActivePane>0</ActivePane><Sizes><Pane><X>1000000</X><Y>1000000</Y></Pane></Sizes><SplitMode>1</SplitMode></Editor>
     <Positions>
       
       
       
       
       
-    <Top><Row0><Sizes><Toolbar-072A0B68><key>iaridepm.enu1</key></Toolbar-072A0B68></Sizes></Row0></Top><Left><Row0><Sizes><Wnd0><Rect><Top>-2</Top><Left>-2</Left><Bottom>467</Bottom><Right>485</Right><x>-2</x><y>-2</y><xscreen>200</xscreen><yscreen>200</yscreen><sizeHorzCX>198216</sizeHorzCX><sizeHorzCY>285714</sizeHorzCY><sizeVertCX>482656</sizeVertCX><sizeVertCY>670000</sizeVertCY></Rect></Wnd0></Sizes></Row0></Left><Right><Row0><Sizes/></Row0></Right><Bottom><Row0><Sizes><Wnd1><Rect><Top>-2</Top><Left>-2</Left><Bottom>188</Bottom><Right>1011</Right><x>-2</x><y>-2</y><xscreen>1013</xscreen><yscreen>190</yscreen><sizeHorzCX>1003964</sizeHorzCX><sizeHorzCY>271429</sizeHorzCY><sizeVertCX>198216</sizeVertCX><sizeVertCY>285714</sizeVertCY></Rect></Wnd1></Sizes></Row0></Bottom><Float><Sizes/></Float></Positions>
+    <Top><Row0><Sizes><Toolbar-04740B68><key>iaridepm.enu1</key></Toolbar-04740B68></Sizes></Row0></Top><Left><Row0><Sizes><Wnd0><Rect><Top>-2</Top><Left>-2</Left><Bottom>219</Bottom><Right>350</Right><x>-2</x><y>-2</y><xscreen>105</xscreen><yscreen>140</yscreen><sizeHorzCX>104063</sizeHorzCX><sizeHorzCY>200000</sizeHorzCY><sizeVertCX>348860</sizeVertCX><sizeVertCY>315714</sizeVertCY></Rect></Wnd0></Sizes></Row0></Left><Right><Row0><Sizes/></Row0></Right><Bottom><Row0><Sizes><Wnd1><Rect><Top>-2</Top><Left>-2</Left><Bottom>436</Bottom><Right>1011</Right><x>-2</x><y>-2</y><xscreen>1013</xscreen><yscreen>438</yscreen><sizeHorzCX>1003964</sizeHorzCX><sizeHorzCY>625714</sizeHorzCY><sizeVertCX>104063</sizeVertCX><sizeVertCY>200000</sizeVertCY></Rect></Wnd1></Sizes></Row0></Bottom><Float><Sizes/></Float></Positions>
   </Desktop>
 </Workspace>
 
