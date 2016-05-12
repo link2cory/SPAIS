@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2013, Dust Networks.  All rights reserved.
+Author: Cory Perkins
 */
 
 #include "dn_common.h"
@@ -14,10 +14,11 @@ Copyright (c) 2013, Dust Networks.  All rights reserved.
 #include "dn_adc.h"
 #include "dn_exe_hdr.h"
 #include "well_known_ports.h"
-#include "app_task_cfg.h"
 #include "Ver.h"
+#include "app_cfg.h"
 
 // SPAIS specific
+#include "main_cfg.h"
 #include "moisture_sense_cfg.h"
 
 //=========================== definitions =====================================
@@ -29,7 +30,7 @@ typedef struct {
 
 data_send_t data_send_v;
 
-
+OS_EVENT *joinedSem;
 //=========================== initialization ==================================
 
 /**
@@ -37,7 +38,7 @@ data_send_t data_send_v;
  */
 int p2_init(void) {
     INT8U                     osErr;
-    
+
     // create a semaphore to indicate mote joined
     joinedSem = OSSemCreate(0);
     ASSERT (joinedSem!=NULL);
@@ -58,8 +59,8 @@ int p2_init(void) {
 
     // task initialize/create end
 
-    //===== wait for the mote to have joined
-    OSSemPend(moisture_sense_task_v.joinedSem,0,&osErr);
+    // wait for the mote to have joined
+    OSSemPend(joinedSem,0,&osErr);
     ASSERT(osErr == OS_ERR_NONE);
 
     return 0;
