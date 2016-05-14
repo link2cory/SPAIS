@@ -21,6 +21,7 @@ Author: Cory Perkins
 // devices
 #define MOISTURE_SENSOR_ADC
 #define MOISTURE_SENSOR_PWR_CTRL DN_GPIO_PIN_0_DEV_ID
+#define UDP_PORT 0xF0B9;
 
 // defaults
 #define DEVICE_ACTIVATION_PEND_DEFAULT 20
@@ -38,31 +39,34 @@ typedef struct{
     INT8U           device_activation_pend;
     INT16U          period;
 } moisture_sense_configFileStruct_t;
-
 //=========================== variables =======================================
 typedef struct {
     OS_STK          moistureSenseTaskStack[TASK_APP_MOISTURE_SENSE_STK_SIZE];
     INT8U           device_activation_pend; // time to wait (in ms) between activating the sensor and reading its output
-    INT32U          period;                 ///< period (in ms) between transmissions
+    INT32U          period;                 // period (in ms) between moisture sensing
 } moisture_sense_task_vars_t;
 
 moisture_sense_task_vars_t moisture_sense_task_v;
 
 typedef struct {
     INT16U value;
+    INT8U new_flag;
 } moisture_sense_data;
 
 moisture_sense_data moistureSenseData;
+
 OS_EVENT *moistureSenseDataMutex;
 //=========================== prototypes ======================================
 static void moistureSenseTask(void* arg);
 static void storeMoistureSenseData(INT16U valueToStore);
 //=========================== initialization ==================================
-
 void initializeMoistureSenseTask() {
     INT8U                     osErr;
 
-    //===== initialize module variables
+    moistureSenseData.value = NULL;
+    moistureSenseData.new_flag = FALSE;
+
+    // initialize module variables
     memset(&moisture_sense_task_v,0,sizeof(moisture_sense_task_vars_t));
     moisture_sense_task_v.device_activation_pend = DEVICE_ACTIVATION_PEND_DEFAULT;
     moisture_sense_task_v.period     = PERIOD_DEFAULT;
@@ -71,7 +75,7 @@ void initializeMoistureSenseTask() {
     moistureSenseDataMutex = OSMutexCreate(53, &osErr);
     ASSERT(osErr == OS_ERR_NONE);
 
-    //===== create the moisture sense task
+    // create the moisture sense task
     osErr = OSTaskCreateExt(
         moistureSenseTask,
         (void*) 0,
@@ -87,8 +91,8 @@ void initializeMoistureSenseTask() {
     OSTaskNameSet(TASK_APP_MOISTURE_SENSE_PRIORITY, (INT8U*)TASK_APP_MOISTURE_SENSE_NAME, &osErr);
     ASSERT(osErr == OS_ERR_NONE);
 
-}
 
+}
 //=========================== Soil Moisture Sense task =================================
 static void moistureSenseTask(void* arg) {
     dn_error_t                     dnErr;
@@ -193,8 +197,15 @@ INT16U retrieveMoistureSenseData() {
     OSMutexPend(moistureSenseDataMutex, 0, &osErr);
     ASSERT(osErr==OS_ERR_NONE);
 
-    // store the data
-    valueToRetrieve = moistureSenseData.value;
+    // check for new data
+    if (moistureSenseData.new_flag == TRUE) {
+        // reset the flag
+        moistureSenseData.new_flag = FALSE;
+        // store the data
+        valueToRetrieve = moistureSenseData.value;
+    } else {
+        valueToRetrieve = NULL;
+    }
 
     // give the mutex back
     osErr = OSMutexPost(moistureSenseDataMutex);

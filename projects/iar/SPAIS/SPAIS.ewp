@@ -998,6 +998,12 @@
     <group>
       <name>spais</name>
       <file>
+        <name>$PROJ_DIR$\..\..\..\src\app\spais\data_send.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\src\app\spais\data_send_cfg.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\src\app\spais\main.c</name>
       </file>
       <file>

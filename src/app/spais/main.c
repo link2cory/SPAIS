@@ -1,7 +1,6 @@
 /*
 Author: Cory Perkins
 */
-
 #include "dn_common.h"
 #include "string.h"
 #include "stdio.h"
@@ -20,9 +19,8 @@ Author: Cory Perkins
 // SPAIS specific
 #include "main_cfg.h"
 #include "moisture_sense_cfg.h"
-
+#include "data_send_cfg.h"
 //=========================== definitions =====================================
-
 //=========================== variables =======================================
 typedef struct {
     INT16U moisture;
@@ -37,7 +35,7 @@ OS_EVENT *joinedSem;
  \brief This is the entry point in the application code.
  */
 int p2_init(void) {
-    INT8U                     osErr;
+    INT8U osErr;
 
     // create a semaphore to indicate mote joined
     joinedSem = OSSemCreate(0);
@@ -45,17 +43,17 @@ int p2_init(void) {
 
     // local interface task
     loc_task_init(
-        JOIN_YES,                             // fJoin
-        NULL,                                 // netId
-        WKP_GPIO_NET,                         // udpPort
-        joinedSem,                            // joinedSem
-        BANDWIDTH_NONE,                       // bandwidth
-        NULL                                  // serviceSem
+        JOIN_YES,       // fJoin
+        NULL,           // netId
+        WKP_USER_1,       // udpPort
+        joinedSem,      // joinedSem
+        BANDWIDTH_NONE, // bandwidth
+        NULL            // serviceSem
     );
 
     // initialize/create any other tasks
     initializeMoistureSenseTask();
-
+    initializeDataSendTask();
 
     // task initialize/create end
 
