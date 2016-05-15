@@ -1015,6 +1015,12 @@
       <file>
         <name>$PROJ_DIR$\..\..\..\src\app\spais\moisture_sense_cfg.h</name>
       </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\src\app\spais\valve_control.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\src\app\spais\valve_control_cfg.h</name>
+      </file>
     </group>
   </group>
   <group>

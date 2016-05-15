@@ -20,6 +20,7 @@ Author: Cory Perkins
 #include "main_cfg.h"
 #include "moisture_sense_cfg.h"
 #include "data_send_cfg.h"
+#include "valve_control.h"
 //=========================== definitions =====================================
 //=========================== variables =======================================
 typedef struct {
@@ -45,7 +46,7 @@ int p2_init(void) {
     loc_task_init(
         JOIN_YES,       // fJoin
         NULL,           // netId
-        WKP_USER_1,       // udpPort
+        WKP_USER_1,     // udpPort
         joinedSem,      // joinedSem
         BANDWIDTH_NONE, // bandwidth
         NULL            // serviceSem
@@ -54,9 +55,12 @@ int p2_init(void) {
     // initialize/create any other tasks
     initializeMoistureSenseTask();
     initializeDataSendTask();
+    initializeValveControlTask();
 
     // task initialize/create end
 
+    // TODO: You can't do this because this method gets called before OSStart()
+    // I will have to come up with another way to make sure the mote has joined before engaging in functionality
     // wait for the mote to have joined
     OSSemPend(joinedSem,0,&osErr);
     ASSERT(osErr == OS_ERR_NONE);

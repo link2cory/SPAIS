@@ -1,3 +1,6 @@
+/*
+Author: Cory Perkins
+*/
 #ifndef APP_TASK_MOISTURE_SENSE_CFG_H
 #define APP_TASK_MOISTURE_SENSE_CFG_H
 
