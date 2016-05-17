@@ -55,10 +55,11 @@ typedef struct {
 
 moisture_sense_data moistureSenseData;
 
-OS_EVENT *moistureSenseDataMutex;
+OS_EVENT *moistureDataQueue;
+void     *moistureDataMsg[2];
 //=========================== prototypes ======================================
 static void moistureSenseTask(void* arg);
-static void storeMoistureSenseData(INT16U valueToStore);
+static void postMoistureData(INT16U valueToStore);
 //=========================== initialization ==================================
 void initializeMoistureSenseTask() {
     INT8U                     osErr;
@@ -71,9 +72,8 @@ void initializeMoistureSenseTask() {
     moisture_sense_task_v.device_activation_pend = DEVICE_ACTIVATION_PEND_DEFAULT;
     moisture_sense_task_v.period = PERIOD_DEFAULT;
 
-    // create the mutex used for accessing the moisture sense data
-    moistureSenseDataMutex = OSMutexCreate(53, &osErr);
-    ASSERT(osErr == OS_ERR_NONE);
+    // create the moisture data message queue
+    moistureDataQueue = OSQCreate(&moistureDataMsg[0], 2);
 
     // create the moisture sense task
     osErr = OSTaskCreateExt(
@@ -167,50 +167,33 @@ static void moistureSenseTask(void* arg) {
         );
         ASSERT(dnErr==DN_ERR_NONE);
 
+        // Debug Code
+        // adcValue = 10;
+        // dnm_ucli_printf("Sending moisture data to dataSend Task: ");
+        // dnm_ucli_printf("%02x", adcValue);
+        // dnm_ucli_printf("\r\n");
+
         // store value to be sent later
-        storeMoistureSenseData(adcValue);
+        postMoistureData(adcValue);
 
         // pend for PERIOD ms
         OSTimeDly(moisture_sense_task_v.period);
     }
 }
 
-static void storeMoistureSenseData(INT16U valueToStore) {
-    INT8U                     osErr;
-
-    // get the mutex
-    OSMutexPend(moistureSenseDataMutex, 0, &osErr);
-    ASSERT(osErr==OS_ERR_NONE);
-
-    // store the data
-    moistureSenseData.value = valueToStore;
-
-    // give the mutex back
-    osErr = OSMutexPost(moistureSenseDataMutex);
-    ASSERT(osErr==OS_ERR_NONE);
-}
 
 INT16U retrieveMoistureSenseData() {
     INT8U  osErr;
-    INT16U valueToRetrieve;
+    INT16U moistureData;
 
-    // get the mutex
-    OSMutexPend(moistureSenseDataMutex, 0, &osErr);
-    ASSERT(osErr==OS_ERR_NONE);
+    moistureData = (INT16U) OSQPend(moistureDataQueue, 0, &osErr);
 
-    // check for new data
-    if (moistureSenseData.new_flag == TRUE) {
-        // reset the flag
-        moistureSenseData.new_flag = FALSE;
-        // store the data
-        valueToRetrieve = moistureSenseData.value;
-    } else {
-        valueToRetrieve = NULL;
-    }
+    return moistureData;
+}
 
-    // give the mutex back
-    osErr = OSMutexPost(moistureSenseDataMutex);
-    ASSERT(osErr==OS_ERR_NONE);
+void postMoistureData(INT16U moistureData) {
+    INT8U osErr;
 
-    return valueToRetrieve;
+    osErr = OSQPost(moistureDataQueue, (void *)moistureData);
+    ASSERT(osErr == OS_ERR_NONE);
 }
