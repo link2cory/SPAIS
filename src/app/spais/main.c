@@ -20,7 +20,7 @@ Author: Cory Perkins
 #include "main_cfg.h"
 #include "moisture_sense_cfg.h"
 #include "data_send_cfg.h"
-#include "valve_control.h"
+#include "valve_control_cfg.h"
 //=========================== definitions =====================================
 //=========================== variables =======================================
 typedef struct {
@@ -30,6 +30,8 @@ typedef struct {
 data_send_t data_send_v;
 
 OS_EVENT *joinedSem;
+//=========================== prototypes ======================================
+dn_error_t rxNotifCb(dn_api_loc_notif_received_t* rxFrame, INT8U length);
 //=========================== initialization ==================================
 
 /**
@@ -52,22 +54,47 @@ int p2_init(void) {
         NULL            // serviceSem
     );
 
+    // CLI task init
+    cli_task_init(
+      "spais",                               // appName
+      NULL                                  // cliCmds
+   );
+
     // initialize/create any other tasks
     initializeMoistureSenseTask();
     initializeDataSendTask();
     initializeValveControlTask();
-
     // task initialize/create end
 
-    // TODO: You can't do this because this method gets called before OSStart()
-    // I will have to come up with another way to make sure the mote has joined before engaging in functionality
-    // wait for the mote to have joined
-    OSSemPend(joinedSem,0,&osErr);
-    ASSERT(osErr == OS_ERR_NONE);
+    // register the notification callback
+    dnm_loc_registerRxNotifCallback(rxNotifCb);
 
     return 0;
 }
 
+
+dn_error_t rxNotifCb(dn_api_loc_notif_received_t* rxFrame, INT8U length) {
+   // Debug Code
+   //  INT8U i;
+
+   // dnm_ucli_printf("packet received!\r\n");
+
+   // dnm_ucli_printf(" - data:       (%d bytes) ",length-sizeof(dn_api_loc_notif_received_t));
+   // for (i=0;i<length-sizeof(dn_api_loc_notif_received_t);i++) {
+   //    dnm_ucli_printf("%02x",rxFrame->data[i]);
+   // }
+   // dnm_ucli_printf("\r\n");
+
+   if (rxFrame->data[0] == VALVE_CONTROL_KEY) {
+        // send the following byte to the valve control task
+        postValveControlData(rxFrame->data[1]);
+   } else {
+        // got some bad data
+        dnm_ucli_printf("I don't know how to handle this data!\r\n");
+   }
+
+   return DN_ERR_NONE;
+}
 //=============================================================================
 //=========================== install a kernel header =========================
 //=============================================================================
