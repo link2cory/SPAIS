@@ -78,10 +78,10 @@ void dataSendTask(void* arg) {
         // dnm_ucli_printf("%02x", moistureSenseData);
         // dnm_ucli_printf("\r\n");
 
-        if (moisture_sense_data != NULL) {
+        if (moistureSenseData != NULL) {
             // todo: is this the best way to do this? I doubt it, it feels sloppy
-            moisture_data_first_byte = (INT8U) moisture_sense_data;
-            moisture_data_second_byte = (INT8U) (moisture_sense_data >> 8) & 0xff;
+            moisture_data_first_byte = (INT8U) moistureSenseData;
+            moisture_data_second_byte = (INT8U) (moistureSenseData >> 8) & 0xff;
 
             // fill in packet "header"
             pkToSend->locSendTo.socketId    = loc_getSocketId();

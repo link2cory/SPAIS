@@ -28,19 +28,26 @@ Author: Cory Perkins
 //=========================== variables =======================================
 typedef struct {
     OS_STK valveControlTaskStack[TASK_APP_VALVE_CONTROL_STK_SIZE];
-    INT8u  device_activation_pend
+    INT8U  device_activation_pend;
 } valve_control_task_vars_t;
 
 valve_control_task_vars_t valve_control_task_v;
+
+// message queue variables
+OS_EVENT *valveControlDataQueue;
+void     *valveControlDataMsg[2];
 //=========================== prototypes ======================================
 static void valveControlTask(void* arg);
+static INT8U retrieveValveControlData();
 //=========================== initialization ==================================
 void initializeValveControlTask() {
     INT8U osErr;
 
     // initialize module variables
     memset(&valve_control_task_v,0,sizeof(valve_control_task_vars_t));
-    valve_control_task_v.period = PERIOD_DEFAULT;
+
+    // create the valve control data queue
+    valveControlDataQueue = OSQCreate(&valveControlDataMsg[0], 2);
 
     // create the data send task
     osErr = OSTaskCreateExt(
@@ -111,6 +118,12 @@ void valveControlTask(void* arg) {
     while (1) {
         // listen for valve-status-change request
         // todo: save the desired value to valveControlData
+        valveControlData = retrieveValveControlData();
+
+        // Debug Code
+        // dnm_ucli_printf("Received valve control data: ");
+        // dnm_ucli_printf("%02x", valveControlData);
+        // dnm_ucli_printf("\r\n");
 
         // set valve control data pin as appropriate
         dnErr = dn_write(
@@ -138,4 +151,20 @@ void valveControlTask(void* arg) {
             sizeof(valveControlEnable)
         );
     }
+}
+
+static INT8U retrieveValveControlData() {
+    INT8U  osErr;
+    INT8U valveControlData;
+
+    valveControlData = (INT8U) OSQPend(valveControlDataQueue, 0, &osErr);
+
+    return valveControlData;
+}
+
+void postValveControlData(INT8U valveControlData) {
+    INT8U osErr;
+
+    osErr = OSQPost(valveControlDataQueue, (void *)valveControlData);
+    ASSERT(osErr == OS_ERR_NONE);
 }
