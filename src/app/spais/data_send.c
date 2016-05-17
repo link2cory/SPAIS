@@ -20,11 +20,9 @@ Author: Cory Perkins
 #include "moisture_sense_cfg.h"
 //=========================== definitions =====================================
 // defaults
-#define PERIOD_DEFAULT                 240000 // 4 minutes
 //=========================== variables =======================================
 typedef struct {
     OS_STK          dataSendTaskStack[TASK_APP_DATA_SEND_STK_SIZE];
-    INT32U          period;                 // period (in ms) between sends
 } data_send_task_vars_t;
 
 data_send_task_vars_t data_send_task_v;
@@ -36,7 +34,6 @@ void initializeDataSendTask() {
 
     // initialize module variables
     memset(&data_send_task_v,0,sizeof(data_send_task_vars_t));
-    data_send_task_v.period = PERIOD_DEFAULT;
 
     // create the data send task
     osErr = OSTaskCreateExt(
@@ -65,7 +62,7 @@ void dataSendTask(void* arg) {
     INT8U           return_code;
 
     // moisture data
-    INT16U          moisture_sense_data;
+    INT16U          moistureSenseData;
     INT8U moisture_data_first_byte;
     INT8U moisture_data_second_byte;
 
@@ -74,7 +71,12 @@ void dataSendTask(void* arg) {
 
     while (1) {
         // get whatever data needs to be sent to the network
-        moisture_sense_data = retrieveMoistureSenseData();
+        moistureSenseData = retrieveMoistureSenseData();
+
+        // Debug Code
+        // dnm_ucli_printf("dataSendTask Data Received: ");
+        // dnm_ucli_printf("%02x", moistureSenseData);
+        // dnm_ucli_printf("\r\n");
 
         if (moisture_sense_data != NULL) {
             // todo: is this the best way to do this? I doubt it, it feels sloppy
@@ -100,7 +102,5 @@ void dataSendTask(void* arg) {
             // there is no new data to send.  Do Nothing.
         }
 
-        // pend
-        OSTimeDly(data_send_task_v.period);
     }
 }
