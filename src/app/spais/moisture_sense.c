@@ -19,7 +19,7 @@ Author: Cory Perkins
 #include "moisture_sense_cfg.h"
 //=========================== definitions =====================================
 // devices
-#define MOISTURE_SENSOR_ADC
+#define MOISTURE_SENSOR_ADC DN_ADC_AI_0_DEV_ID
 #define MOISTURE_SENSOR_PWR_CTRL DN_GPIO_PIN_0_DEV_ID
 #define UDP_PORT 0xF0B9;
 
@@ -36,8 +36,8 @@ Author: Cory Perkins
 
 // format of config file
 typedef struct{
-    INT8U           device_activation_pend;
-    INT16U          period;
+    INT8U  device_activation_pend;
+    INT16U period;
 } moisture_sense_configFileStruct_t;
 //=========================== variables =======================================
 typedef struct {
@@ -69,7 +69,7 @@ void initializeMoistureSenseTask() {
     // initialize module variables
     memset(&moisture_sense_task_v,0,sizeof(moisture_sense_task_vars_t));
     moisture_sense_task_v.device_activation_pend = DEVICE_ACTIVATION_PEND_DEFAULT;
-    moisture_sense_task_v.period     = PERIOD_DEFAULT;
+    moisture_sense_task_v.period = PERIOD_DEFAULT;
 
     // create the mutex used for accessing the moisture sense data
     moistureSenseDataMutex = OSMutexCreate(53, &osErr);
@@ -125,7 +125,8 @@ static void moistureSenseTask(void* arg) {
     );
     ASSERT(dnErr==DN_ERR_NONE);
 
-     // open and configure the ADC
+    // open and configure the ADC
+    // todo: do the math and see if the nominal values can be easily found
     adcOpenArgs.rdacOffset  = 0;
     adcOpenArgs.vgaGain     = 0;
     adcOpenArgs.fBypassVga  = 1;
