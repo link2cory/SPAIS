@@ -38,6 +38,47 @@ static INT16U senseMoisture();
 
 //======================= function definitions =================================
 /*
+* initializeMoistureSenseTask - responsible for all initialization of the
+*                               moistureSenseTask
+*/
+void initializeMoistureSenseTask() {
+    INT8U                     os_error;
+
+    // initialize module variables
+    // TODO: check the configuration file for any changes to these defaults
+    memset(&moistureSenseTaskVars,0,sizeof(MOISTURE_SENSE_TASK_VARS_T));
+    moistureSenseTaskVars.device_activation_pend = DEVICE_ACTIVATION_PEND_DEFAULT;
+    moistureSenseTaskVars.period = PERIOD_DEFAULT;
+
+    // create the moisture data message queue
+    moistureDataQueue = OSQCreate(&moistureDataMsg[0], 2);
+
+    initializeMoistureSensorCtrl();
+    initializeMoistureSensorADC();
+
+    // create the moisture sense task
+    os_error = OSTaskCreateExt(
+        moistureSenseTask,
+        (void*) 0,
+        (OS_STK*)(&moistureSenseTaskVars.moistureSenseTaskStack[TASK_APP_MOISTURE_SENSE_STK_SIZE- 1]),
+        TASK_APP_MOISTURE_SENSE_PRIORITY,
+        TASK_APP_MOISTURE_SENSE_PRIORITY,
+        (OS_STK*)moistureSenseTaskVars.moistureSenseTaskStack,
+        TASK_APP_MOISTURE_SENSE_STK_SIZE,
+        (void*) 0,
+        OS_TASK_OPT_STK_CHK | OS_TASK_OPT_STK_CLR
+    );
+    ASSERT(os_error == OS_ERR_NONE);
+
+    OSTaskNameSet(
+        TASK_APP_MOISTURE_SENSE_PRIORITY,
+        (INT8U*)TASK_APP_MOISTURE_SENSE_NAME,
+        &os_error
+    );
+    ASSERT(os_error == OS_ERR_NONE);
+}
+
+/*
 * moistureSenseTask - obtain periodic moisture data readings and post the
 *                     results publicly
 */
@@ -126,47 +167,6 @@ static INT16U senseMoisture() {
 }
 
 /*
-* initializeMoistureSenseTask - responsible for all initialization of the
-*                               moistureSenseTask
-*/
-void initializeMoistureSenseTask() {
-    INT8U                     os_error;
-
-    // initialize module variables
-    // TODO: check the configuration file for any changes to these defaults
-    memset(&moistureSenseTaskVars,0,sizeof(MOISTURE_SENSE_TASK_VARS_T));
-    moistureSenseTaskVars.device_activation_pend = DEVICE_ACTIVATION_PEND_DEFAULT;
-    moistureSenseTaskVars.period = PERIOD_DEFAULT;
-
-    // create the moisture data message queue
-    moistureDataQueue = OSQCreate(&moistureDataMsg[0], 2);
-
-    initializeMoistureSensorCtrl();
-    initializeMoistureSensorADC();
-
-    // create the moisture sense task
-    os_error = OSTaskCreateExt(
-        moistureSenseTask,
-        (void*) 0,
-        (OS_STK*)(&moistureSenseTaskVars.moistureSenseTaskStack[TASK_APP_MOISTURE_SENSE_STK_SIZE- 1]),
-        TASK_APP_MOISTURE_SENSE_PRIORITY,
-        TASK_APP_MOISTURE_SENSE_PRIORITY,
-        (OS_STK*)moistureSenseTaskVars.moistureSenseTaskStack,
-        TASK_APP_MOISTURE_SENSE_STK_SIZE,
-        (void*) 0,
-        OS_TASK_OPT_STK_CHK | OS_TASK_OPT_STK_CLR
-    );
-    ASSERT(os_error == OS_ERR_NONE);
-
-    OSTaskNameSet(
-        TASK_APP_MOISTURE_SENSE_PRIORITY,
-        (INT8U*)TASK_APP_MOISTURE_SENSE_NAME,
-        &os_error
-    );
-    ASSERT(os_error == OS_ERR_NONE);
-}
-
-/*
 * initializeMoistureSensorCtrl - initialize the GPIO pin tied to the switch
 *                                controlling the flow of power to the soil
 *                                moisture sensor.  For toggling its power
@@ -187,8 +187,8 @@ static void initializeMoistureSensorCtrl() {
     // configure as output
     moisture_sensor_ctrl_cfg.initialLevel = FALSE;
     dn_error = dn_ioctl(
-        MOISTURE_SENSOR_PWR_CTRL,     // device
-        DN_IOCTL_GPIO_CFG_OUTPUT,     // request
+        MOISTURE_SENSOR_PWR_CTRL,        // device
+        DN_IOCTL_GPIO_CFG_OUTPUT,        // request
         &moisture_sensor_ctrl_cfg,       // args
         sizeof(moisture_sensor_ctrl_cfg) // argLen
     );
@@ -211,7 +211,7 @@ static void initializeMoistureSensorADC() {
     adc_open_args.vgaGain     = 0;
     adc_open_args.fBypassVga  = 1;
     dn_error = dn_open(
-        DN_ADC_AI_0_DEV_ID, // device
+        DN_ADC_AI_0_DEV_ID,   // device
         &adc_open_args,       // args
         sizeof(adc_open_args) // argLen
     );
