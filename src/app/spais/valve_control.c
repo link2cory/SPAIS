@@ -5,8 +5,9 @@
 */
 #include "includes.h"
 //=========================== definitions ======================================
-#define VALVE_CONTROL_DATA   DN_GPIO_PIN_1_DEV_ID
-#define VALVE_CONTROL_ENABLE DN_GPIO_PIN_2_DEV_ID
+#define VALVE_CONTROL_DATA             DN_GPIO_PIN_1_DEV_ID
+#define VALVE_CONTROL_ENABLE           DN_GPIO_PIN_2_DEV_ID
+#define DEVICE_ACTIVATION_PEND_DEFAULT 50
 
 //============================ typedefs ========================================
 typedef struct {
@@ -18,8 +19,8 @@ typedef struct {
 VALVE_CONTROL_TASK_VARS_T valveControlTaskVars;
 
 // message queue variables
-OS_EVENT *valve_control_dataQueue;
-void     *valve_control_dataMsg[2];
+OS_EVENT *valveControlDataQueue;
+void     *valveControlDataMsg[2];
 
 //=========================== prototypes =======================================
 static void valveControlTask(void* arg);
@@ -37,9 +38,11 @@ void initializeValveControlTask() {
 
     // initialize module variables
     memset(&valveControlTaskVars,0,sizeof(VALVE_CONTROL_TASK_VARS_T));
+    // TODO: check the configuration file for any changes to these defaults
+    valveControlTaskVars.device_activation_pend = DEVICE_ACTIVATION_PEND_DEFAULT;
 
     // create the valve control data queue
-    valve_control_dataQueue = OSQCreate(&valve_control_dataMsg[0], 2);
+    valveControlDataQueue = OSQCreate(&valveControlDataMsg[0], 2);
 
     // create the data send task
     os_error = OSTaskCreateExt(
@@ -57,6 +60,8 @@ void initializeValveControlTask() {
 
     OSTaskNameSet(TASK_APP_VALVE_CONTROL_PRIORITY, (INT8U*)TASK_APP_VALVE_CONTROL_NAME, &os_error);
     ASSERT(os_error == OS_ERR_NONE);
+
+    initializeValveControl();
 }
 
 /*
@@ -86,7 +91,7 @@ static VALVE_STATUS retrieveValveControlData() {
     VALVE_STATUS valve_control_data;
 
     valve_control_data = (VALVE_STATUS) OSQPend(
-        valve_control_dataQueue,
+        valveControlDataQueue,
         0,
         &os_error
     );
@@ -103,7 +108,7 @@ static VALVE_STATUS retrieveValveControlData() {
 void postValveControlData(VALVE_STATUS valve_control_data) {
     INT8U os_error;
 
-    os_error = OSQPost(valve_control_dataQueue, (void *)valve_control_data);
+    os_error = OSQPost(valveControlDataQueue, (void *)valve_control_data);
     ASSERT(os_error == OS_ERR_NONE);
 }
 
