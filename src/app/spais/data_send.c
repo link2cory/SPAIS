@@ -47,54 +47,46 @@ void initializeDataSendTask() {
 * dataSendTask - retrieve any publicly posted data and send it to the manager
 */
 void dataSendTask(void* arg) {
-    dn_error_t      dn_error;
-    INT8U           os_error;
+    dn_error_t dn_error;
+    INT8U      os_error;
 
     // local interface variables
-    loc_sendtoNW_t* pkToSend;
-    INT8U           pkBuf[sizeof(loc_sendtoNW_t) + 1];
+    loc_sendtoNW_t* packet_to_send;
+    INT8U           packet_buffer[sizeof(loc_sendtoNW_t) + 1];
     INT8U           return_code;
 
     // moisture data
-    INT16U          moistureSenseData;
-    INT8U moisture_data_first_byte;
-    INT8U moisture_data_second_byte;
+    INT16U moisture_sense_data;
+    INT8U  moisture_data_first_byte;
+    INT8U  moisture_data_second_byte;
 
     // initialize packet variables
-    pkToSend = (loc_sendtoNW_t*)pkBuf;
+    packet_to_send = (loc_sendtoNW_t*)packet_buffer;
 
     while (1) {
         // get whatever data needs to be sent to the network
-        moistureSenseData = retrieveMoistureSenseData();
+        moisture_sense_data = retrieveMoistureSenseData();
 
-        // Debug Code
-        // dnm_ucli_printf("dataSendTask Data Received: ");
-        // dnm_ucli_printf("%02x", moistureSenseData);
-        // dnm_ucli_printf("\r\n");
+        // dnm_ucli_printf("Found data to send: %02x \r\n", moisture_sense_data);
 
-        if (moistureSenseData != NULL) {
-            // todo: is this the best way to do this? I doubt it, it feels sloppy
-            moisture_data_first_byte = (INT8U) moistureSenseData;
-            moisture_data_second_byte = (INT8U) (moistureSenseData >> 8) & 0xff;
+        // TODO: is this the best way to do this? I doubt it, it feels sloppy
+        moisture_data_first_byte  = (INT8U) moisture_sense_data;
+        moisture_data_second_byte = (INT8U) (moisture_sense_data >> 8) & 0xff;
 
-            // fill in packet "header"
-            pkToSend->locSendTo.socketId    = loc_getSocketId();
-            pkToSend->locSendTo.destAddr    = DN_MGR_IPV6_MULTICAST_ADDR;
-            pkToSend->locSendTo.destPort    = WKP_USER_2;
-            pkToSend->locSendTo.serviceType = DN_API_SERVICE_TYPE_BW;
-            pkToSend->locSendTo.priority    = DN_API_PRIORITY_MED;
-            pkToSend->locSendTo.packetId    = 0xFFFF;
+        // fill in packet "header"
+        packet_to_send->locSendTo.socketId    = loc_getSocketId();
+        packet_to_send->locSendTo.destAddr    = DN_MGR_IPV6_MULTICAST_ADDR;
+        packet_to_send->locSendTo.destPort    = WKP_USER_2;
+        packet_to_send->locSendTo.serviceType = DN_API_SERVICE_TYPE_BW;
+        packet_to_send->locSendTo.priority    = DN_API_PRIORITY_MED;
+        packet_to_send->locSendTo.packetId    = 0xFFFF;
 
-            // fill in the payload
-            pkToSend->locSendTo.payload[0] = moisture_data_first_byte;
-            pkToSend->locSendTo.payload[1] = moisture_data_second_byte;
+        // fill in the payload
+        packet_to_send->locSendTo.payload[0] = moisture_data_first_byte;
+        packet_to_send->locSendTo.payload[1] = moisture_data_second_byte;
 
-            // send the packet
-            dn_error = dnm_loc_sendtoCmd(pkToSend, 1, &return_code);
-            ASSERT (dn_error == DN_ERR_NONE);
-        } else {
-            // there is no new data to send.  Do Nothing.
-        }
-
+        // send the packet
+        dn_error = dnm_loc_sendtoCmd(packet_to_send, 1, &return_code);
+        ASSERT(dn_error == DN_ERR_NONE);
     }
 }
