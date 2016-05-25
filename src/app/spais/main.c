@@ -1,50 +1,39 @@
 /*
-Author: Cory Perkins
+* Project: SPAIS
+* Module: main.c
+* Author: Cory Perkins
 */
-#include "dn_common.h"
-#include "string.h"
-#include "stdio.h"
-#include "cli_task.h"
-#include "loc_task.h"
-#include "dn_system.h"
-#include "dn_gpio.h"
-#include "dnm_local.h"
-#include "dn_fs.h"
-#include "dn_adc.h"
-#include "dn_exe_hdr.h"
-#include "well_known_ports.h"
-#include "Ver.h"
-#include "app_cfg.h"
+#include "includes.h"
+//=========================== definitions ======================================
+// Network Interface Defines
+#define VALVE_CONTROL_KEY 01
+//=========================== typedefs =========================================
+typedef enum NOTIFICATION_TYPE
+{
+    valve_control,
+    configurator
+} NOTIFICATION_TYPE;
 
-// SPAIS specific
-#include "main_cfg.h"
-#include "moisture_sense_cfg.h"
-#include "data_send_cfg.h"
-#include "valve_control_cfg.h"
-//=========================== definitions =====================================
-//=========================== variables =======================================
-typedef struct {
-    INT16U moisture;
-} data_send_t;
-
-data_send_t data_send_v;
-
+//=========================== variables ========================================
 OS_EVENT *joinedSem;
-//=========================== prototypes ======================================
-dn_error_t rxNotifCb(dn_api_loc_notif_received_t* rxFrame, INT8U length);
-//=========================== initialization ==================================
 
-/**
- \brief This is the entry point in the application code.
- */
+//=========================== prototypes =======================================
+dn_error_t networkNotificationCallback(dn_api_loc_notif_received_t* notification, INT8U length);
+
+//=========================== initialization ===================================
+/*
+* p2_init - initialize the program execution
+*
+* @return 0
+*/
 int p2_init(void) {
-    INT8U osErr;
+    INT8U os_error;
 
-    // create a semaphore to indicate mote joined
+    // create a semaphore to indicate mote joined the network
     joinedSem = OSSemCreate(0);
-    ASSERT (joinedSem!=NULL);
+    ASSERT(joinedSem != NULL);
 
-    // local interface task
+    // initialize local interface task
     loc_task_init(
         JOIN_YES,       // fJoin
         NULL,           // netId
@@ -54,10 +43,10 @@ int p2_init(void) {
         NULL            // serviceSem
     );
 
-    // CLI task init
+    // initialize command line interface task (debug only)
     cli_task_init(
-      "spais",                               // appName
-      NULL                                  // cliCmds
+      "spais", // appName
+      NULL     // cliCmds
    );
 
     // initialize/create any other tasks
@@ -66,38 +55,43 @@ int p2_init(void) {
     initializeValveControlTask();
     // task initialize/create end
 
-    // register the notification callback
-    dnm_loc_registerRxNotifCallback(rxNotifCb);
+    // register the network notification callback
+    dnm_loc_registerRxNotifCallback(networkNotificationCallback);
 
     return 0;
 }
 
+/*
+* networkNotificationCallback - route notification data to the appropriate task
+*                               Caution: this method is a callback, it should
+*                               NEVER be called directly!
+* @return dn_error_t DN_ERR_NONE
+*/
+dn_error_t networkNotificationCallback(dn_api_loc_notif_received_t* notification, INT8U length) {
+    // dnm_ucli_printf("Notification received!\r\n");
 
-dn_error_t rxNotifCb(dn_api_loc_notif_received_t* rxFrame, INT8U length) {
-   // Debug Code
-   //  INT8U i;
-
-   // dnm_ucli_printf("packet received!\r\n");
-
-   // dnm_ucli_printf(" - data:       (%d bytes) ",length-sizeof(dn_api_loc_notif_received_t));
-   // for (i=0;i<length-sizeof(dn_api_loc_notif_received_t);i++) {
-   //    dnm_ucli_printf("%02x",rxFrame->data[i]);
-   // }
-   // dnm_ucli_printf("\r\n");
-
-   if (rxFrame->data[0] == VALVE_CONTROL_KEY) {
+    NOTIFICATION_TYPE notification_type;
+    notification_type = (NOTIFICATION_TYPE) notification->data[0];
+    // extract the notification type and handle it appropriately
+    if (notification_type == valve_control) {
         // send the following byte to the valve control task
-        postValveControlData(rxFrame->data[1]);
-   } else {
-        // got some bad data
-        dnm_ucli_printf("I don't know how to handle this data!\r\n");
+        // dnm_ucli_printf("Received a Valve Control notification!\r\n");
+        postValveControlData(notification->data[1]);
+    } else if (notification_type == configurator) {
+        // dnm_ucli_printf("Received a Configurator notification!\r\n");
+        // TODO: handle configurator notifications by sending the rest of the data to
+        // the configurator task
+    } else {
+        // got a notification that is not supported
+        // dnm_ucli_printf("There is no support for the given notification!\r\n");
+        // TODO: Consider setting the return value to SOME_ERROR
    }
 
    return DN_ERR_NONE;
 }
-//=============================================================================
-//=========================== install a kernel header =========================
-//=============================================================================
+//==============================================================================
+//=========================== install a kernel header ==========================
+//==============================================================================
 
 /**
  A kernel header is a set of bytes prepended to the actual binary image of this

@@ -1,170 +1,197 @@
 /*
-Author: Cory Perkins
+* Project: SPAIS
+* Module: valve_control.c
+* Author: Cory Perkins
 */
-#include "dn_common.h"
-#include "string.h"
-#include "stdio.h"
-#include "cli_task.h"
-#include "loc_task.h"
-#include "dn_system.h"
-#include "dn_gpio.h"
-#include "dnm_local.h"
-#include "dn_fs.h"
-#include "dn_adc.h"
-#include "dn_exe_hdr.h"
-#include "well_known_ports.h"
-#include "Ver.h"
-
-
-#include "valve_control_cfg.h"
-//=========================== definitions =====================================
-// devices
+#include "includes.h"
+//=========================== definitions ======================================
 #define VALVE_CONTROL_DATA   DN_GPIO_PIN_1_DEV_ID
 #define VALVE_CONTROL_ENABLE DN_GPIO_PIN_2_DEV_ID
 
-// device states
-#define GPIO_ON_STATE 0x01
-#define GPIO_OFF_STATE 0x00
-//=========================== variables =======================================
+//============================ typedefs ========================================
 typedef struct {
     OS_STK valveControlTaskStack[TASK_APP_VALVE_CONTROL_STK_SIZE];
     INT8U  device_activation_pend;
-} valve_control_task_vars_t;
+} VALVE_CONTROL_TASK_VARS_T;
 
-valve_control_task_vars_t valve_control_task_v;
+//=========================== variables ========================================
+VALVE_CONTROL_TASK_VARS_T valveControlTaskVars;
 
 // message queue variables
-OS_EVENT *valveControlDataQueue;
-void     *valveControlDataMsg[2];
-//=========================== prototypes ======================================
+OS_EVENT *valve_control_dataQueue;
+void     *valve_control_dataMsg[2];
+
+//=========================== prototypes =======================================
 static void valveControlTask(void* arg);
-static INT8U retrieveValveControlData();
-//=========================== initialization ==================================
+static VALVE_STATUS retrieveValveControlData();
+static void changeValveStatus(VALVE_STATUS valve_control_data);
+static void initializeValveControl();
+
+//======================= function definitions =================================
+/*
+* initializeValveControlTask - initialize the valve control task and any
+*                              hardware as necessary
+*/
 void initializeValveControlTask() {
-    INT8U osErr;
+    INT8U os_error;
 
     // initialize module variables
-    memset(&valve_control_task_v,0,sizeof(valve_control_task_vars_t));
+    memset(&valveControlTaskVars,0,sizeof(VALVE_CONTROL_TASK_VARS_T));
 
     // create the valve control data queue
-    valveControlDataQueue = OSQCreate(&valveControlDataMsg[0], 2);
+    valve_control_dataQueue = OSQCreate(&valve_control_dataMsg[0], 2);
 
     // create the data send task
-    osErr = OSTaskCreateExt(
+    os_error = OSTaskCreateExt(
         valveControlTask,
         (void*) 0,
-        (OS_STK*)(&valve_control_task_v.valveControlTaskStack[TASK_APP_VALVE_CONTROL_STK_SIZE- 1]),
+        (OS_STK*)(&valveControlTaskVars.valveControlTaskStack[TASK_APP_VALVE_CONTROL_STK_SIZE- 1]),
         TASK_APP_VALVE_CONTROL_PRIORITY,
         TASK_APP_VALVE_CONTROL_PRIORITY,
-        (OS_STK*)valve_control_task_v.valveControlTaskStack,
+        (OS_STK*)valveControlTaskVars.valveControlTaskStack,
         TASK_APP_VALVE_CONTROL_STK_SIZE,
         (void*) 0,
         OS_TASK_OPT_STK_CHK | OS_TASK_OPT_STK_CLR
     );
-    ASSERT(osErr == OS_ERR_NONE);
-    OSTaskNameSet(TASK_APP_VALVE_CONTROL_PRIORITY, (INT8U*)TASK_APP_VALVE_CONTROL_NAME, &osErr);
-    ASSERT(osErr == OS_ERR_NONE);
+    ASSERT(os_error == OS_ERR_NONE);
+
+    OSTaskNameSet(TASK_APP_VALVE_CONTROL_PRIORITY, (INT8U*)TASK_APP_VALVE_CONTROL_NAME, &os_error);
+    ASSERT(os_error == OS_ERR_NONE);
 }
-//=========================== Soil Moisture Sense task =================================
-void valveControlTask(void* arg) {
+
+/*
+* ValveControlTask - service any valve status change requests
+*/
+static void valveControlTask(void* arg) {
+    VALVE_STATUS valve_control_data;
+
+    while (1) {
+        // listen for valve-status-change request
+        valve_control_data = retrieveValveControlData();
+
+        // dnm_ucli_printf("Received valve control data: %02x \r\n", valve_control_data);
+
+        changeValveStatus(valve_control_data);
+    }
+}
+
+/*
+* initializeValveControlTask - check for any valve status change requests
+*                              Caution: This function PENDS until there is data!
+*
+* @return VALVE_STATUS valve_control_data the desired valve status
+*/
+static VALVE_STATUS retrieveValveControlData() {
+    INT8U        os_error;
+    VALVE_STATUS valve_control_data;
+
+    valve_control_data = (VALVE_STATUS) OSQPend(
+        valve_control_dataQueue,
+        0,
+        &os_error
+    );
+
+    return valve_control_data;
+}
+
+/*
+* postValveControlData - post a valve status change request to the message
+*                        queue.  It will be serviced later
+*
+* @param VALVE_STATUS valve_control_data the desired valve status
+*/
+void postValveControlData(VALVE_STATUS valve_control_data) {
+    INT8U os_error;
+
+    os_error = OSQPost(valve_control_dataQueue, (void *)valve_control_data);
+    ASSERT(os_error == OS_ERR_NONE);
+}
+
+/*
+* initializeValveControl - initialize the GPIO pins tied to the valve control
+*                          enable switch, as well as the valve control direction
+*                          data for easy toggling of each.  For controlling
+*                          these pins see changeValveStatus()
+*/
+static void initializeValveControl() {
     // error variables
-    dn_error_t      dnErr;
-    INT8U           osErr;
+    dn_error_t      dn_error;
+    INT8U           os_error;
 
-    // valve control data variables
-    INT8U                   valveControlData;
-    dn_gpio_ioctl_cfg_out_t valveControlDataCfg;
+    dn_gpio_ioctl_cfg_out_t valve_control_cfg;
+    valve_control_cfg.initialLevel = FALSE;
 
-    // valve control enable variables
-    INT8U                   valveControlEnable;
-    dn_gpio_ioctl_cfg_out_t valveControlEnableCfg;
-
-    // open and configure the valveControlData GPIO
-    dnErr = dn_open(
+    // open and configure the valve_control_data GPIO
+    dn_error = dn_open(
         VALVE_CONTROL_DATA,
         NULL,
         0
     );
-    ASSERT(dnErr==DN_ERR_NONE);
+    ASSERT(dn_error == DN_ERR_NONE);
 
     // configure as output
-    valveControlDataCfg.initialLevel = GPIO_OFF_STATE;
-    dnErr = dn_ioctl(
-        VALVE_CONTROL_DATA,     // device
-        DN_IOCTL_GPIO_CFG_OUTPUT,     // request
-        &valveControlDataCfg,       // args
-        sizeof(valveControlDataCfg) // argLen
+    dn_error = dn_ioctl(
+        VALVE_CONTROL_DATA,            // device
+        DN_IOCTL_GPIO_CFG_OUTPUT,      // request
+        &valve_control_cfg,       // args
+        sizeof(valve_control_cfg) // argLen
     );
-    ASSERT(dnErr==DN_ERR_NONE);
+    ASSERT(dn_error == DN_ERR_NONE);
 
-    // open and configure the valveControlEnable GPIO
-    dnErr = dn_open(
+    // open and configure the valve_control_enable GPIO
+    dn_error = dn_open(
         VALVE_CONTROL_ENABLE,
         NULL,
         0
     );
-    ASSERT(dnErr==DN_ERR_NONE);
+    ASSERT(dn_error == DN_ERR_NONE);
 
     // configure as output
-    valveControlEnableCfg.initialLevel = GPIO_OFF_STATE;
-    dnErr = dn_ioctl(
+    dn_error = dn_ioctl(
         VALVE_CONTROL_ENABLE,     // device
         DN_IOCTL_GPIO_CFG_OUTPUT,     // request
-        &valveControlEnableCfg,       // args
-        sizeof(valveControlEnableCfg) // argLen
+        &valve_control_cfg,       // args
+        sizeof(valve_control_cfg) // argLen
     );
-    ASSERT(dnErr==DN_ERR_NONE);
-
-    while (1) {
-        // listen for valve-status-change request
-        // todo: save the desired value to valveControlData
-        valveControlData = retrieveValveControlData();
-
-        // Debug Code
-        // dnm_ucli_printf("Received valve control data: ");
-        // dnm_ucli_printf("%02x", valveControlData);
-        // dnm_ucli_printf("\r\n");
-
-        // set valve control data pin as appropriate
-        dnErr = dn_write(
-            VALVE_CONTROL_DATA,
-            &valveControlData,
-            sizeof(valveControlData)
-        );
-
-        // enable valve control
-        valveControlEnable = GPIO_ON_STATE;
-        dnErr = dn_write(
-            VALVE_CONTROL_ENABLE,
-            &valveControlEnable,
-            sizeof(valveControlEnable)
-        );
-
-        // wait the delay
-        OSTimeDly(valve_control_task_v.device_activation_pend);
-
-        // disable valve control
-        valveControlEnable = GPIO_OFF_STATE;
-        dnErr = dn_write(
-            VALVE_CONTROL_ENABLE,
-            &valveControlEnable,
-            sizeof(valveControlEnable)
-        );
-    }
+    ASSERT(dn_error == DN_ERR_NONE);
 }
 
-static INT8U retrieveValveControlData() {
-    INT8U  osErr;
-    INT8U valveControlData;
+/*
+* changeValveStatus - changes the status of the valve to the passed valve status
+*                     (open or closed)
+*                     Caution: Valve Control must be initialized prior to
+*                     calling this function.  See initializeValveControl()
+*
+* @param VALVE_STATUS valve_control_data the desired status of the valve
+*/
+static void changeValveStatus(VALVE_STATUS valve_control_data) {
+    dn_error_t dn_error;
+    INT8U      valve_control_enable;
 
-    valveControlData = (INT8U) OSQPend(valveControlDataQueue, 0, &osErr);
+    // set valve control data pin as appropriate
+    dn_error = dn_write(
+        VALVE_CONTROL_DATA,
+        &valve_control_data,
+        sizeof(valve_control_data)
+    );
 
-    return valveControlData;
-}
+    // enable valve control
+    valve_control_enable = TRUE;
+    dn_error = dn_write(
+        VALVE_CONTROL_ENABLE,
+        &valve_control_enable,
+        sizeof(valve_control_enable)
+    );
+    ASSERT(dn_error == DN_ERR_NONE);
 
-void postValveControlData(INT8U valveControlData) {
-    INT8U osErr;
+    // wait the delay
+    OSTimeDly(valveControlTaskVars.device_activation_pend);
 
-    osErr = OSQPost(valveControlDataQueue, (void *)valveControlData);
-    ASSERT(osErr == OS_ERR_NONE);
+    // disable valve control
+    valve_control_enable = FALSE;
+    dn_error = dn_write(
+        VALVE_CONTROL_ENABLE,
+        &valve_control_enable,
+        sizeof(valve_control_enable)
+    );
 }
