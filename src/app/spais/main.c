@@ -50,6 +50,8 @@ int p2_init(void) {
    );
 
     // initialize/create any other tasks
+    // TODO: send the joinedSem to these methods and use it similarly to the
+    // loc_task_init() function
     initializeMoistureSenseTask();
     initializeDataSendTask();
     initializeValveControlTask();
