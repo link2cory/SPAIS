@@ -17,7 +17,7 @@
 * initializeMoistureSenseTask - responsible for all initialization of the
 *                               moistureSenseTask
 */
-extern void initializeMoistureSenseTask();
+extern void initializeMoistureSenseTask(OS_EVENT* joined_sem);
 
 /*
 * retrieveMoistureSenseData - retrieve the latest moisture data

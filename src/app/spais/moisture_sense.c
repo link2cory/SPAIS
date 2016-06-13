@@ -11,7 +11,7 @@
 
 // defaults
 #define DEVICE_ACTIVATION_PEND_DEFAULT 20
-#define PERIOD_DEFAULT                 300000 // 5 minutes
+#define PERIOD_DEFAULT                 10000 // 5 minutes
 
 // filenames
 #define MOISTURE_SENSE_CONFIG_FILE "moisture-sense.cfg"
@@ -21,6 +21,7 @@ typedef struct {
     OS_STK          moistureSenseTaskStack[TASK_APP_MOISTURE_SENSE_STK_SIZE];
     INT8U           device_activation_pend;
     INT32U          period;
+    OS_EVENT* joined_sem;
 } MOISTURE_SENSE_TASK_VARS_T;
 
 //=========================== variables ========================================
@@ -41,7 +42,7 @@ static INT16U senseMoisture();
 * initializeMoistureSenseTask - responsible for all initialization of the
 *                               moistureSenseTask
 */
-void initializeMoistureSenseTask() {
+void initializeMoistureSenseTask(OS_EVENT* joined_sem) {
     INT8U                     os_error;
 
     // initialize module variables
@@ -49,6 +50,7 @@ void initializeMoistureSenseTask() {
     memset(&moistureSenseTaskVars,0,sizeof(MOISTURE_SENSE_TASK_VARS_T));
     moistureSenseTaskVars.device_activation_pend = DEVICE_ACTIVATION_PEND_DEFAULT;
     moistureSenseTaskVars.period = PERIOD_DEFAULT;
+    moistureSenseTaskVars.joined_sem = joined_sem;
 
     // create the moisture data message queue
     moistureDataQueue = OSQCreate(&moistureDataMsg[0], 2);
@@ -83,19 +85,27 @@ void initializeMoistureSenseTask() {
 *                     results publicly
 */
 static void moistureSenseTask(void* arg) {
-    INT16U     moisture;
+    INT16U moisture;
+    INT8U  os_error;
+
+    // wait for the mote to join the network
+    OSSemPend(
+        moistureSenseTaskVars.joined_sem,
+        0,
+        &os_error
+    );
+    ASSERT(os_error == OS_ERR_NONE);
 
     while (1) {
         changeSensorPowerState(TRUE);
 
         // wait the configured number of ms
         OSTimeDly(moistureSenseTaskVars.device_activation_pend);
-
         moisture = senseMoisture();
 
         changeSensorPowerState(FALSE);
 
-        // dnm_ucli_printf("Sensed raw moisture value of: %02x \r\n", moisture);
+        dnm_ucli_printf("Sensed raw moisture value of: %d \r\n", moisture);
 
         postMoistureData(moisture);
 
@@ -155,6 +165,7 @@ static INT16U senseMoisture() {
     INT16U                  moisture;
     int                     num_bytes_read;
 
+    moisture = 0;
     // read the adc
     num_bytes_read = dn_read(
         DN_ADC_AI_0_DEV_ID, // device

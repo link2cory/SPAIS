@@ -4,9 +4,6 @@
 * Author: Cory Perkins
 */
 #include "includes.h"
-//=========================== definitions ======================================
-// Network Interface Defines
-#define VALVE_CONTROL_KEY 01
 //=========================== typedefs =========================================
 typedef enum NOTIFICATION_TYPE
 {
@@ -39,7 +36,7 @@ int p2_init(void) {
         NULL,           // netId
         WKP_USER_1,     // udpPort
         joinedSem,      // joinedSem
-        BANDWIDTH_NONE, // bandwidth
+        5000,           // bandwidth
         NULL            // serviceSem
     );
 
@@ -52,10 +49,9 @@ int p2_init(void) {
     // initialize/create any other tasks
     // TODO: send the joinedSem to these methods and use it similarly to the
     // loc_task_init() function
-    initializeMoistureSenseTask();
+    initializeMoistureSenseTask(joinedSem);
     initializeDataSendTask();
     initializeValveControlTask();
-    // task initialize/create end
 
     // register the network notification callback
     dnm_loc_registerRxNotifCallback(networkNotificationCallback);
