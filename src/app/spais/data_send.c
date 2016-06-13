@@ -8,7 +8,7 @@
 // defaults
 //============================ typedefs ========================================
 typedef struct {
-    OS_STK          dataSendTaskStack[TASK_APP_DATA_SEND_STK_SIZE];
+    OS_STK    dataSendTaskStack[TASK_APP_DATA_SEND_STK_SIZE];
 } DATA_SEND_TASK_VARS_T;
 
 //=========================== variables ========================================
@@ -67,16 +67,20 @@ void dataSendTask(void* arg) {
         // get whatever data needs to be sent to the network
         moisture_sense_data = retrieveMoistureSenseData();
 
-        // dnm_ucli_printf("Found data to send: %02x \r\n", moisture_sense_data);
+        dnm_ucli_printf("Found data to send: %d \r\n", moisture_sense_data);
 
         // TODO: is this the best way to do this? I doubt it, it feels sloppy
         moisture_data_first_byte  = (INT8U) moisture_sense_data;
         moisture_data_second_byte = (INT8U) (moisture_sense_data >> 8) & 0xff;
 
+        dnm_ucli_printf("First Byte: %d \r\n", moisture_data_first_byte);
+        dnm_ucli_printf("Second Byte: %d \r\n", moisture_data_second_byte);
+
+
         // fill in packet "header"
         packet_to_send->locSendTo.socketId    = loc_getSocketId();
         packet_to_send->locSendTo.destAddr    = DN_MGR_IPV6_MULTICAST_ADDR;
-        packet_to_send->locSendTo.destPort    = WKP_USER_2;
+        packet_to_send->locSendTo.destPort    = WKP_USER_1;
         packet_to_send->locSendTo.serviceType = DN_API_SERVICE_TYPE_BW;
         packet_to_send->locSendTo.priority    = DN_API_PRIORITY_MED;
         packet_to_send->locSendTo.packetId    = 0xFFFF;
@@ -86,7 +90,14 @@ void dataSendTask(void* arg) {
         packet_to_send->locSendTo.payload[1] = moisture_data_second_byte;
 
         // send the packet
-        dn_error = dnm_loc_sendtoCmd(packet_to_send, 1, &return_code);
+        dn_error = dnm_loc_sendtoCmd(packet_to_send, 2, &return_code);
         ASSERT(dn_error == DN_ERR_NONE);
+
+      // print
+      if (return_code == DN_API_RC_OK) {
+          dnm_ucli_printf("packet sent\r\n");
+      } else {
+          dnm_ucli_printf("return_code = 0x%02x\r\n",return_code);
+      }
     }
 }
