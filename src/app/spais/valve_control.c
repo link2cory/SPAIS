@@ -5,8 +5,8 @@
 */
 #include "includes.h"
 //=========================== definitions ======================================
-#define VALVE_CONTROL_DATA             DN_GPIO_PIN_1_DEV_ID
-#define VALVE_CONTROL_ENABLE           DN_GPIO_PIN_2_DEV_ID
+#define VALVE_CONTROL_DATA             DN_GPIO_PIN_22_DEV_ID
+#define VALVE_CONTROL_ENABLE           DN_GPIO_PIN_21_DEV_ID
 #define DEVICE_ACTIVATION_PEND_DEFAULT 50
 
 //============================ typedefs ========================================
@@ -74,7 +74,7 @@ static void valveControlTask(void* arg) {
         // listen for valve-status-change request
         valve_control_data = retrieveValveControlData();
 
-        // dnm_ucli_printf("Received valve control data: %02x \r\n", valve_control_data);
+        dnm_ucli_printf("Received valve control data: %02x \r\n", valve_control_data);
 
         changeValveStatus(valve_control_data);
     }
